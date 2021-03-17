@@ -1,11 +1,9 @@
 package domain
 
-import "net/url"
-
 type Client struct {
 	ID                  string
 	Secret              string
-	AllowedRedirectUrls []url.URL
+	AllowedRedirectUrls []string
 	AllowedGrantTypes   []string
 	AllowedScopes       []string
 }

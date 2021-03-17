@@ -1,4 +1,4 @@
-package domain
+package authorization
 
 // Authorization representing the data sent in the first request of the protocol
 type AuthorizationRequest struct {
@@ -7,8 +7,4 @@ type AuthorizationRequest struct {
 	RedirectURI string
 	Scope       []string
 	State       string
-}
-
-func validate(data AuthorizationRequest) error {
-	return nil
 }
