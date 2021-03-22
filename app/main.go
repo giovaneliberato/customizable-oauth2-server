@@ -7,5 +7,4 @@ import (
 
 func main() {
 	http.ListenAndServe(":3000", routes.AuthorizationRoutes())
-
 }

@@ -1,36 +1,43 @@
 package authorization
 
-import (
-	"goauth-extension/app/domain"
-)
+import "goauth-extension/app/domain/client"
 
 type ValidationError struct {
-	Error            string
+	Err              string
 	ErrorDescription string
+	Abort            bool
 }
 
 func (v *ValidationError) Empty() bool {
-	return v.Error == ""
+	return v.Err == ""
 }
 
-func Validate(client domain.Client, data AuthorizationRequest) ValidationError {
-	if client.ID != data.ClientID {
-		return ValidationError{"invalid_request", "Invalid client"}
+func (v *ValidationError) HasErrors() bool {
+	return !v.Empty()
+}
+
+func (v *ValidationError) Error() string {
+	return v.ErrorDescription
+}
+
+func Validate(client client.Client, data AuthorizationRequest) *ValidationError {
+	if client.ID == "" || data.ClientID != data.ClientID {
+		return &ValidationError{"invalid_request", "Invalid client", true}
 	}
 
 	if notIn(data.RedirectURI, client.AllowedRedirectUrls) {
-		return ValidationError{"invalid_request", "Invalid client details"}
+		return &ValidationError{"invalid_request", "Invalid client details", true}
 	}
 
 	if notIn(data.GrantType, client.AllowedGrantTypes) {
-		return ValidationError{"unauthorized_client", "Unsupported grant type"}
+		return &ValidationError{"unauthorized_client", "Unsupported grant type", false}
 	}
 
 	if oneItemNotIn(data.Scope, client.AllowedScopes) {
-		return ValidationError{"invalid_scope", "Requested scopes are not valid"}
+		return &ValidationError{"invalid_scope", "Requested scopes are not valid", false}
 	}
 
-	return ValidationError{}
+	return nil
 }
 
 func oneItemNotIn(query []string, set []string) bool {

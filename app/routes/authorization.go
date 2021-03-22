@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"goauth-extension/app/domain"
+	"goauth-extension/app/domain/authorization"
 	"net/http"
 	"net/url"
 	"strings"
@@ -19,13 +19,15 @@ func AuthorizationRoutes() chi.Router {
 }
 
 func authorize(w http.ResponseWriter, r *http.Request) {
-	//authReq := parse(r.URL.Query())
+	authRequest := parse(r.URL.Query())
+
+	authorization.Do(authRequest)
 
 	http.Redirect(w, r, "/oauth2/consent", http.StatusFound)
 }
 
-func parse(qs url.Values) domain.AuthorizationRequest {
-	return domain.AuthorizationRequest{
+func parse(qs url.Values) authorization.AuthorizationRequest {
+	return authorization.AuthorizationRequest{
 		ClientID:    qs.Get("client_id"),
 		GrantType:   qs.Get("grant_type"),
 		RedirectURI: qs.Get("redirect_uri"),

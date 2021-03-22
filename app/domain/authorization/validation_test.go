@@ -1,14 +1,27 @@
 package authorization_test
 
 import (
-	"goauth-extension/app/domain"
 	"goauth-extension/app/domain/authorization"
+	"goauth-extension/app/domain/client"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestInvalidClient(t *testing.T) {
+	req := authorization.AuthorizationRequest{
+		ClientID: "some-client",
+	}
+
+	err := authorization.Validate(client.Client{}, req)
+	assert.NotNil(t, err)
+	assert.False(t, err.Empty())
+	assert.True(t, err.Abort)
+	assert.Equal(t, "invalid_request", err.Err)
+	assert.Equal(t, "Invalid client", err.ErrorDescription)
+}
+
+func TestInvalidClientID(t *testing.T) {
 	client := BuildTestClient()
 	req := authorization.AuthorizationRequest{
 		ClientID: "non-existent-client",
@@ -17,8 +30,9 @@ func TestInvalidClient(t *testing.T) {
 	err := authorization.Validate(client, req)
 	assert.NotNil(t, err)
 	assert.False(t, err.Empty())
-	assert.Equal(t, "invalid_request", err.Error)
-	assert.Equal(t, "Invalid client", err.ErrorDescription)
+	assert.True(t, err.Abort)
+	assert.Equal(t, "invalid_request", err.Err)
+	assert.Equal(t, "Invalid client details", err.ErrorDescription)
 }
 
 func TestRedirectUrl(t *testing.T) {
@@ -31,7 +45,8 @@ func TestRedirectUrl(t *testing.T) {
 	err := authorization.Validate(client, req)
 	assert.NotNil(t, err)
 	assert.False(t, err.Empty())
-	assert.Equal(t, "invalid_request", err.Error)
+	assert.True(t, err.Abort)
+	assert.Equal(t, "invalid_request", err.Err)
 	assert.Equal(t, "Invalid client details", err.ErrorDescription)
 }
 
@@ -46,7 +61,8 @@ func TestUnsupportedGrantType(t *testing.T) {
 	err := authorization.Validate(client, req)
 	assert.NotNil(t, err)
 	assert.False(t, err.Empty())
-	assert.Equal(t, "unauthorized_client", err.Error)
+	assert.False(t, err.Abort)
+	assert.Equal(t, "unauthorized_client", err.Err)
 	assert.Equal(t, "Unsupported grant type", err.ErrorDescription)
 }
 
@@ -62,7 +78,8 @@ func TestUnsupportedScopeNoneMatch(t *testing.T) {
 	err := authorization.Validate(client, req)
 	assert.NotNil(t, err)
 	assert.False(t, err.Empty())
-	assert.Equal(t, "invalid_scope", err.Error)
+	assert.False(t, err.Abort)
+	assert.Equal(t, "invalid_scope", err.Err)
 	assert.Equal(t, "Requested scopes are not valid", err.ErrorDescription)
 }
 
@@ -78,7 +95,8 @@ func TestUnsupportedScopeOneMatch(t *testing.T) {
 	err := authorization.Validate(client, req)
 	assert.NotNil(t, err)
 	assert.False(t, err.Empty())
-	assert.Equal(t, "invalid_scope", err.Error)
+	assert.False(t, err.Abort)
+	assert.Equal(t, "invalid_scope", err.Err)
 	assert.Equal(t, "Requested scopes are not valid", err.ErrorDescription)
 }
 
@@ -92,8 +110,7 @@ func TestSupportedScopeOneMatch(t *testing.T) {
 	}
 
 	err := authorization.Validate(client, req)
-	assert.NotNil(t, err)
-	assert.True(t, err.Empty())
+	assert.Nil(t, err)
 }
 
 func TestSupportedScopeAllMatch(t *testing.T) {
@@ -106,12 +123,11 @@ func TestSupportedScopeAllMatch(t *testing.T) {
 	}
 
 	err := authorization.Validate(client, req)
-	assert.NotNil(t, err)
-	assert.True(t, err.Empty())
+	assert.Nil(t, err)
 }
 
-func BuildTestClient() domain.Client {
-	return domain.Client{
+func BuildTestClient() client.Client {
+	return client.Client{
 		ID:                  "test-id",
 		Secret:              "secret",
 		AllowedRedirectUrls: []string{"https://test.client/oauth2-callback"},

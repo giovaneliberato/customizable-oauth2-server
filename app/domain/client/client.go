@@ -1,4 +1,4 @@
-package domain
+package client
 
 type Client struct {
 	ID                  string
@@ -6,4 +6,8 @@ type Client struct {
 	AllowedRedirectUrls []string
 	AllowedGrantTypes   []string
 	AllowedScopes       []string
+}
+
+func GetClientByID(ID string) Client {
+	return Client{}
 }
