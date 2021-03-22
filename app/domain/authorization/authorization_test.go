@@ -2,14 +2,19 @@ package authorization_test
 
 import (
 	"goauth-extension/app/domain/authorization"
+	"goauth-extension/app/infra"
 	"testing"
 
 	"github.com/dgrijalva/jwt-go/v4"
+	"github.com/golobby/container/v2"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNotBuildConsentContextIfValidationFails(t *testing.T) {
-	ctx, err := authorization.Do(authorization.AuthorizationRequest{})
+	infra.InitializeComponents()
+	var service authorization.Service
+	container.Make(&service)
+	ctx, err := service.Authorize(authorization.AuthorizationRequest{})
 
 	assert.NotNil(t, err)
 	assert.Empty(t, ctx)
@@ -23,7 +28,10 @@ func TestBuildConsentContext(t *testing.T) {
 		Scope:       []string{"profile"},
 	}
 
-	ctx, err := authorization.Do(req)
+	infra.InitializeComponents()
+	var service authorization.Service
+	err := container.Make(&service)
+	ctx, err := service.Authorize(authorization.AuthorizationRequest{})
 
 	assert.Nil(t, err)
 	assert.Equal(t, req.ClientID, ctx.ClientID)

@@ -22,8 +22,22 @@ type ConsentContext struct {
 	SignedAuthorizationRequest string
 }
 
-func Do(request AuthorizationRequest) (ConsentContext, *ValidationError) {
-	client := client.GetClientByID(request.ClientID)
+type Service interface {
+	Authorize(AuthorizationRequest) (ConsentContext, *ValidationError)
+}
+
+type service struct {
+	client client.Service
+}
+
+func NewService(client client.Service) Service {
+	return &service{
+		client: client,
+	}
+}
+
+func (s *service) Authorize(request AuthorizationRequest) (ConsentContext, *ValidationError) {
+	client := s.client.GetByID(request.ClientID)
 
 	err := Validate(client, request)
 	if err != nil {

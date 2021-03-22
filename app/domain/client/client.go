@@ -8,6 +8,17 @@ type Client struct {
 	AllowedScopes       []string
 }
 
-func GetClientByID(ID string) Client {
+type Service interface {
+	GetByID(ID string) Client
+}
+
+type service struct {
+}
+
+func NewService() Service {
+	return &service{}
+}
+
+func (s *service) GetByID(ID string) Client {
 	return Client{}
 }
