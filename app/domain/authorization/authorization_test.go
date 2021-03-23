@@ -7,6 +7,7 @@ import (
 	"goauth-extension/app/test"
 	"testing"
 
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,5 +43,6 @@ func TestBuildConsentContext(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, req.ClientID, ctx.ClientID)
 	assert.Equal(t, req.Scope, ctx.RequestedScopes)
+	assert.Equal(t, viper.GetString("authorization.login-url"), ctx.AuthorizationURL)
 	assert.NotEmpty(t, ctx.SignedAuthorizationRequest)
 }

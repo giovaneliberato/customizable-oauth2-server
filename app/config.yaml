@@ -1,7 +1,7 @@
 
 
 signing:
-  key: "NQoKabpEJUZtQU5SiO7E0indujJ70DicqlUiKuMfwCM="
+  key: "please do us a favor and change this to a real key"
 
 authorization:
   login-url: https://my-app.com/oauth2/authorize

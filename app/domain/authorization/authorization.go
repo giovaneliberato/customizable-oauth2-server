@@ -17,14 +17,15 @@ type AuthorizationRequest struct {
 	State       string
 }
 
-type ConsentContext struct {
+type AuthozirationContext struct {
+	AuthorizationURL           string
 	ClientID                   string
 	RequestedScopes            []string
 	SignedAuthorizationRequest string
 }
 
 type Service interface {
-	Authorize(AuthorizationRequest) (ConsentContext, *ValidationError)
+	Authorize(AuthorizationRequest) (AuthozirationContext, *ValidationError)
 }
 
 type service struct {
@@ -37,15 +38,16 @@ func NewService(client client.Service) Service {
 	}
 }
 
-func (s *service) Authorize(request AuthorizationRequest) (ConsentContext, *ValidationError) {
+func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext, *ValidationError) {
 	client := s.client.GetByID(request.ClientID)
 
 	err := Validate(client, request)
 	if err != nil {
-		return ConsentContext{}, err
+		return AuthozirationContext{}, err
 	}
 
-	ctx := ConsentContext{
+	ctx := AuthozirationContext{
+		AuthorizationURL:           viper.GetString("authorization.login-url"),
 		ClientID:                   client.ID,
 		RequestedScopes:            request.Scope,
 		SignedAuthorizationRequest: signAndEncode(request),

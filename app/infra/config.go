@@ -1,11 +1,24 @@
 package infra
 
-import "github.com/spf13/viper"
+import (
+	"path"
+	"path/filepath"
+	"runtime"
+
+	"github.com/spf13/viper"
+)
+
+func rootDir() string {
+	_, b, _, _ := runtime.Caller(0)
+	d := path.Join(path.Dir(b))
+	return filepath.Dir(d)
+}
 
 func LoadConfig() {
-	viper.SetConfigName("config") // name of config file (without extension)
+	viper.AddConfigPath(rootDir())
+	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath("../")
+
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)
