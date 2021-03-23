@@ -11,5 +11,5 @@ func InitializeApp() {
 
 func main() {
 	infra.InitializeApp()
-	http.ListenAndServe(":3000", routes.AuthorizationRoutes())
+	http.ListenAndServe(":3000", routes.AuthorizationRouter())
 }

@@ -113,6 +113,19 @@ func TestSupportedScopeOneMatch(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestSupportedScopeTwoMatch(t *testing.T) {
+	client := BuildTestClient()
+	req := authorization.AuthorizationRequest{
+		ClientID:    "test-id",
+		RedirectURI: "https://test.client/oauth2-callback",
+		GrantType:   "authorization_code",
+		Scope:       []string{"profile", "orders"},
+	}
+
+	err := authorization.Validate(client, req)
+	assert.Nil(t, err)
+}
+
 func TestSupportedScopeAllMatch(t *testing.T) {
 	client := BuildTestClient()
 	req := authorization.AuthorizationRequest{

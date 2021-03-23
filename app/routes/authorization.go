@@ -7,23 +7,50 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi"
+	"github.com/golobby/container/v2"
 )
 
 // AuthorizationRoutes returns a chi.Router with all authorization routes mapped
-func AuthorizationRoutes() chi.Router {
+func AuthorizationRouter() chi.Router {
 	router := chi.NewRouter()
 
-	router.Get("/oauth2/authorize", authorize)
+	var route AuthorizationRoutes
+	container.Make(&route)
+
+	router.Get("/oauth2/authorize", route.Authorize)
 
 	return router
 }
 
-func authorize(w http.ResponseWriter, r *http.Request) {
+type AuthorizationRoutes interface {
+	Authorize(http.ResponseWriter, *http.Request)
+}
+
+type routes struct {
+	service authorization.Service
+}
+
+func NewAuthorizationRoutes(service authorization.Service) AuthorizationRoutes {
+	return &routes{
+		service: service,
+	}
+}
+
+func (a *routes) Authorize(w http.ResponseWriter, r *http.Request) {
 	authRequest := parse(r.URL.Query())
 
-	authorization.Do(authRequest)
+	context, err := a.service.Authorize(authRequest)
 
-	http.Redirect(w, r, "/oauth2/consent", http.StatusFound)
+	if err != nil {
+		if err.Abort {
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
+	}
+
+	redirectURI := buildRedirectURI(context)
+
+	http.Redirect(w, r, redirectURI, http.StatusFound)
 }
 
 func parse(qs url.Values) authorization.AuthorizationRequest {
@@ -34,4 +61,13 @@ func parse(qs url.Values) authorization.AuthorizationRequest {
 		Scope:       strings.Split(qs.Get("scope"), " "),
 		State:       qs.Get("state"),
 	}
+}
+
+func buildRedirectURI(ctx authorization.AuthozirationContext) string {
+	qs := url.Values{}
+	qs.Add("client_id", ctx.ClientID)
+	qs.Add("requested_scopes", strings.Join(ctx.RequestedScopes, " "))
+	qs.Add("context", ctx.SignedAuthorizationRequest)
+
+	return ctx.AuthorizationURL + "?" + qs.Encode()
 }

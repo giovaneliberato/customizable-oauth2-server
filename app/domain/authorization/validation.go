@@ -3,9 +3,9 @@ package authorization
 import "goauth-extension/app/domain/client"
 
 type ValidationError struct {
-	Err              string
-	ErrorDescription string
-	Abort            bool
+	Err              string `json:"error,omitempty"`
+	ErrorDescription string `json:"error_description,omitempty"`
+	Abort            bool   `json:"-"`
 }
 
 func (v *ValidationError) Empty() bool {
