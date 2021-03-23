@@ -5,6 +5,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
 )
 
 // Authorization representing the data sent in the first request of the protocol
@@ -54,16 +55,15 @@ func (s *service) Authorize(request AuthorizationRequest) (ConsentContext, *Vali
 }
 
 func signAndEncode(req AuthorizationRequest) string {
-	token := jwt.New(jwt.GetSigningMethod("HS256"))
-
-	token.Claims = jwt.MapClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"client_id":    req.ClientID,
 		"state":        req.State,
 		"scopes":       req.Scope,
 		"redirect_uri": req.RedirectURI,
 		"nounce":       uuid.NewString(), // here to avoid replay attacks
-	}
+	})
 
-	tokenString, _ := token.SignedString("signing-key")
+	key := viper.GetString("signing.key")
+	tokenString, _ := token.SignedString([]byte(key))
 	return tokenString
 }

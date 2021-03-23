@@ -1,0 +1,7 @@
+
+
+signing:
+  key: "NQoKabpEJUZtQU5SiO7E0indujJ70DicqlUiKuMfwCM="
+
+authorization:
+  login-url: https://my-app.com/oauth2/authorize

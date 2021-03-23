@@ -2,18 +2,21 @@ package authorization_test
 
 import (
 	"goauth-extension/app/domain/authorization"
+	"goauth-extension/app/domain/client"
 	"goauth-extension/app/infra"
+	"goauth-extension/app/test"
 	"testing"
 
-	"github.com/dgrijalva/jwt-go/v4"
-	"github.com/golobby/container/v2"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNotBuildConsentContextIfValidationFails(t *testing.T) {
-	infra.InitializeComponents()
-	var service authorization.Service
-	container.Make(&service)
+	infra.LoadConfig()
+	clientServiceMock := new(test.ClientServiceMock)
+	clientServiceMock.Return = client.Client{}
+
+	service := authorization.NewService(clientServiceMock)
+
 	ctx, err := service.Authorize(authorization.AuthorizationRequest{})
 
 	assert.NotNil(t, err)
@@ -21,22 +24,23 @@ func TestNotBuildConsentContextIfValidationFails(t *testing.T) {
 }
 
 func TestBuildConsentContext(t *testing.T) {
+	infra.LoadConfig()
+	clientServiceMock := new(test.ClientServiceMock)
+	clientServiceMock.Return = test.TestClient
+	service := authorization.NewService(clientServiceMock)
+
 	req := authorization.AuthorizationRequest{
 		ClientID:    "test-id",
 		RedirectURI: "https://test.client/oauth2-callback",
 		GrantType:   "authorization_code",
+		State:       "client-state",
 		Scope:       []string{"profile"},
 	}
 
-	infra.InitializeComponents()
-	var service authorization.Service
-	err := container.Make(&service)
-	ctx, err := service.Authorize(authorization.AuthorizationRequest{})
+	ctx, err := service.Authorize(req)
 
 	assert.Nil(t, err)
 	assert.Equal(t, req.ClientID, ctx.ClientID)
 	assert.Equal(t, req.Scope, ctx.RequestedScopes)
-
-	decodedJWT, _ := jwt.Parse(ctx.SignedAuthorizationRequest, nil)
-	assert.NotEmpty(t, decodedJWT.Claims)
+	assert.NotEmpty(t, ctx.SignedAuthorizationRequest)
 }
