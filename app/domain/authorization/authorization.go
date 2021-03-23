@@ -2,9 +2,8 @@ package authorization
 
 import (
 	"goauth-extension/app/domain/client"
+	"goauth-extension/app/infra/token"
 
-	"github.com/dgrijalva/jwt-go/v4"
-	"github.com/google/uuid"
 	"github.com/spf13/viper"
 )
 
@@ -29,12 +28,14 @@ type Service interface {
 }
 
 type service struct {
-	client client.Service
+	client      client.Service
+	tokenSigner token.TokenSigner
 }
 
-func NewService(client client.Service) Service {
+func NewService(client client.Service, signer token.TokenSigner) Service {
 	return &service{
-		client: client,
+		client:      client,
+		tokenSigner: signer,
 	}
 }
 
@@ -47,25 +48,23 @@ func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext,
 	}
 
 	ctx := AuthozirationContext{
-		AuthorizationURL:           viper.GetString("authorization.login-url"),
+		AuthorizationURL:           viper.GetString("authorization.consent-url"),
 		ClientID:                   client.ID,
 		RequestedScopes:            request.Scope,
-		SignedAuthorizationRequest: signAndEncode(request),
+		SignedAuthorizationRequest: s.buildToken(request),
 	}
 
 	return ctx, nil
 }
 
-func signAndEncode(req AuthorizationRequest) string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"client_id":    req.ClientID,
-		"state":        req.State,
-		"scopes":       req.Scope,
-		"redirect_uri": req.RedirectURI,
-		"nounce":       uuid.NewString(), // here to avoid replay attacks
-	})
+func (s *service) buildToken(req AuthorizationRequest) string {
+	claims := token.ContextClaims{
+		ClientID:    req.ClientID,
+		State:       req.State,
+		Scope:       req.Scope,
+		RedirectURI: req.RedirectURI,
+	}
 
-	key := viper.GetString("signing.key")
-	tokenString, _ := token.SignedString([]byte(key))
+	tokenString, _ := s.tokenSigner.SignAndEncode(claims)
 	return tokenString
 }

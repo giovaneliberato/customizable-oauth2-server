@@ -1,7 +1,9 @@
 
 
-signing:
-  key: "please do us a favor and change this to a real key"
+jwt:
+  signing-key: "please do us a favor and change this to a SHA256 real key"
+  issuer: "your-service-name-here"
+  expiration-seconds: 120
 
 authorization:
-  login-url: https://my-app.com/oauth2/authorize
+  consent-url: https://my-app.com/oauth2/authorize

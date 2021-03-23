@@ -4,6 +4,7 @@ import (
 	"goauth-extension/app/domain/authorization"
 	"goauth-extension/app/domain/client"
 	"goauth-extension/app/infra"
+	"goauth-extension/app/infra/token"
 	"goauth-extension/app/test"
 	"testing"
 
@@ -16,7 +17,7 @@ func TestNotBuildConsentContextIfValidationFails(t *testing.T) {
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = client.Client{}
 
-	service := authorization.NewService(clientServiceMock)
+	service := authorization.NewService(clientServiceMock, token.NewTokenSigner())
 
 	ctx, err := service.Authorize(authorization.AuthorizationRequest{})
 
@@ -28,7 +29,7 @@ func TestBuildConsentContext(t *testing.T) {
 	infra.LoadConfig()
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
-	service := authorization.NewService(clientServiceMock)
+	service := authorization.NewService(clientServiceMock, token.NewTokenSigner())
 
 	req := authorization.AuthorizationRequest{
 		ClientID:    "test-id",
@@ -43,6 +44,6 @@ func TestBuildConsentContext(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, req.ClientID, ctx.ClientID)
 	assert.Equal(t, req.Scope, ctx.RequestedScopes)
-	assert.Equal(t, viper.GetString("authorization.login-url"), ctx.AuthorizationURL)
+	assert.Equal(t, viper.GetString("authorization.consent-url"), ctx.AuthorizationURL)
 	assert.NotEmpty(t, ctx.SignedAuthorizationRequest)
 }

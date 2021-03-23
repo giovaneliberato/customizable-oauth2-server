@@ -24,8 +24,3 @@ func LoadConfig() {
 		panic(err)
 	}
 }
-
-func InitializeApp() {
-	LoadConfig()
-	InitializeComponents()
-}

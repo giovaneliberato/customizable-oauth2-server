@@ -15,7 +15,7 @@ import (
 )
 
 func TestInvalidClientID(t *testing.T) {
-	infra.InitializeApp()
+	infra.InitApplication()
 	server := httptest.NewServer(routes.AuthorizationRouter())
 	defer server.Close()
 
@@ -33,7 +33,7 @@ func TestInvalidClientID(t *testing.T) {
 }
 
 func TestInvalidRedirectURL(t *testing.T) {
-	infra.InitializeApp()
+	infra.InitApplication()
 	server := httptest.NewServer(routes.AuthorizationRouter())
 	defer server.Close()
 
@@ -51,7 +51,7 @@ func TestInvalidRedirectURL(t *testing.T) {
 }
 
 func TestUnsupportedGrantType(t *testing.T) {
-	infra.InitializeApp()
+	infra.InitApplication()
 	server := httptest.NewServer(routes.AuthorizationRouter())
 	defer server.Close()
 
@@ -69,7 +69,7 @@ func TestUnsupportedGrantType(t *testing.T) {
 }
 
 func TestInvalidScope(t *testing.T) {
-	infra.InitializeApp()
+	infra.InitApplication()
 	server := httptest.NewServer(routes.AuthorizationRouter())
 	defer server.Close()
 
@@ -87,7 +87,7 @@ func TestInvalidScope(t *testing.T) {
 }
 
 func TestAuthoriationRedirects(t *testing.T) {
-	infra.InitializeApp()
+	infra.InitApplication()
 	server := httptest.NewServer(routes.AuthorizationRouter())
 	defer server.Close()
 
@@ -108,7 +108,7 @@ func TestAuthoriationRedirects(t *testing.T) {
 }
 
 func TestAuthoriationRedirectsWithMultipleScopes(t *testing.T) {
-	infra.InitializeApp()
+	infra.InitApplication()
 	server := httptest.NewServer(routes.AuthorizationRouter())
 	defer server.Close()
 

@@ -2,6 +2,8 @@
 
 - what this project is / is not
 
+- application requirements
+
 - concepts
     - authorization code
     - 

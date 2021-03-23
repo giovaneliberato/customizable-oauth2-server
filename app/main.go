@@ -6,10 +6,7 @@ import (
 	"net/http"
 )
 
-func InitializeApp() {
-}
-
 func main() {
-	infra.InitializeApp()
+	infra.InitApplication()
 	http.ListenAndServe(":3000", routes.AuthorizationRouter())
 }
