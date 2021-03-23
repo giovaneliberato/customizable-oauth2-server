@@ -18,7 +18,7 @@ func TestInvalidClient(t *testing.T) {
 	assert.False(t, err.Empty())
 	assert.True(t, err.Abort)
 	assert.Equal(t, "invalid_request", err.Err)
-	assert.Equal(t, "Invalid client", err.ErrorDescription)
+	assert.Equal(t, "Invalid client details", err.ErrorDescription)
 }
 
 func TestInvalidClientID(t *testing.T) {
@@ -62,7 +62,7 @@ func TestUnsupportedGrantType(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.False(t, err.Empty())
 	assert.False(t, err.Abort)
-	assert.Equal(t, "unauthorized_client", err.Err)
+	assert.Equal(t, "unsupported_response_type", err.Err)
 	assert.Equal(t, "Unsupported grant type", err.ErrorDescription)
 }
 

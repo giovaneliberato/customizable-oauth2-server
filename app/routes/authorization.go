@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/json"
 	"goauth-extension/app/domain/authorization"
 	"net/http"
 	"net/url"
@@ -42,10 +43,9 @@ func (a *routes) Authorize(w http.ResponseWriter, r *http.Request) {
 	context, err := a.service.Authorize(authRequest)
 
 	if err != nil {
-		if err.Abort {
-			http.Error(w, "", http.StatusBadRequest)
-			return
-		}
+		jsonBody, _ := json.Marshal(err)
+		http.Error(w, string(jsonBody), http.StatusUnauthorized)
+		return
 	}
 
 	redirectURI := buildRedirectURI(context)

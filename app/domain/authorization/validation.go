@@ -21,8 +21,8 @@ func (v *ValidationError) Error() string {
 }
 
 func Validate(client client.Client, data AuthorizationRequest) *ValidationError {
-	if client.ID == "" || data.ClientID != data.ClientID {
-		return &ValidationError{"invalid_request", "Invalid client", true}
+	if client.ID == "" || client.ID != data.ClientID {
+		return &ValidationError{"invalid_request", "Invalid client details", true}
 	}
 
 	if notIn(data.RedirectURI, client.AllowedRedirectUrls) {
@@ -30,7 +30,7 @@ func Validate(client client.Client, data AuthorizationRequest) *ValidationError 
 	}
 
 	if notIn(data.GrantType, client.AllowedGrantTypes) {
-		return &ValidationError{"unauthorized_client", "Unsupported grant type", false}
+		return &ValidationError{"unsupported_response_type", "Unsupported grant type", false}
 	}
 
 	if oneItemNotIn(data.Scope, client.AllowedScopes) {

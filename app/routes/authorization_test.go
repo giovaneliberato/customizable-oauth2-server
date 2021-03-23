@@ -14,20 +14,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInvalidClientIDBadRequest(t *testing.T) {
+func TestInvalidClientID(t *testing.T) {
 	infra.InitializeApp()
 	server := httptest.NewServer(routes.AuthorizationRouter())
 	defer server.Close()
 
 	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
-	q := req.URL.Query()
-	q.Add("client_id", "invalid")
-	q.Add("grant_type", "authorization_code")
-	q.Add("redirect_uri", test.TestClient.AllowedRedirectUrls[0])
-	q.Add("scope", "profile")
-	q.Add("state", "client-data")
-
-	req.URL.RawQuery = q.Encode()
+	req.URL.RawQuery = buildQueryStringWith("client_id", "invalid").Encode()
 
 	resp, _ := httpClient().Do(req)
 	var respBody authorization.ValidationError
@@ -36,7 +29,61 @@ func TestInvalidClientIDBadRequest(t *testing.T) {
 
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 	assert.Empty(t, resp.Header.Get("Location"))
-	assert.Equal(t, "invalid_client", respBody.Err)
+	assert.Equal(t, "invalid_request", respBody.Err)
+}
+
+func TestInvalidRedirectURL(t *testing.T) {
+	infra.InitializeApp()
+	server := httptest.NewServer(routes.AuthorizationRouter())
+	defer server.Close()
+
+	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
+	req.URL.RawQuery = buildQueryStringWith("redirect_uri", "not even a url").Encode()
+
+	resp, _ := httpClient().Do(req)
+	var respBody authorization.ValidationError
+
+	json.NewDecoder(resp.Body).Decode(&respBody)
+
+	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+	assert.Empty(t, resp.Header.Get("Location"))
+	assert.Equal(t, "invalid_request", respBody.Err)
+}
+
+func TestUnsupportedGrantType(t *testing.T) {
+	infra.InitializeApp()
+	server := httptest.NewServer(routes.AuthorizationRouter())
+	defer server.Close()
+
+	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
+	req.URL.RawQuery = buildQueryStringWith("grant_type", "invalid_grant").Encode()
+
+	resp, _ := httpClient().Do(req)
+	var respBody authorization.ValidationError
+
+	json.NewDecoder(resp.Body).Decode(&respBody)
+
+	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+	assert.Empty(t, resp.Header.Get("Location"))
+	assert.Equal(t, "unsupported_response_type", respBody.Err)
+}
+
+func TestInvalidScope(t *testing.T) {
+	infra.InitializeApp()
+	server := httptest.NewServer(routes.AuthorizationRouter())
+	defer server.Close()
+
+	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
+	req.URL.RawQuery = buildQueryStringWith("scope", "everythingggggg").Encode()
+
+	resp, _ := httpClient().Do(req)
+	var respBody authorization.ValidationError
+
+	json.NewDecoder(resp.Body).Decode(&respBody)
+
+	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+	assert.Empty(t, resp.Header.Get("Location"))
+	assert.Equal(t, "invalid_scope", respBody.Err)
 }
 
 func TestAuthoriationRedirects(t *testing.T) {
@@ -45,14 +92,7 @@ func TestAuthoriationRedirects(t *testing.T) {
 	defer server.Close()
 
 	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
-	q := req.URL.Query()
-	q.Add("client_id", test.TestClient.ID)
-	q.Add("grant_type", "authorization_code")
-	q.Add("redirect_uri", test.TestClient.AllowedRedirectUrls[0])
-	q.Add("scope", "profile")
-	q.Add("state", "client-data")
-
-	req.URL.RawQuery = q.Encode()
+	req.URL.RawQuery = buildQueryStringWith("scope", "profile").Encode()
 
 	resp, _ := httpClient().Do(req)
 
@@ -73,14 +113,7 @@ func TestAuthoriationRedirectsWithMultipleScopes(t *testing.T) {
 	defer server.Close()
 
 	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
-	q := req.URL.Query()
-	q.Add("client_id", test.TestClient.ID)
-	q.Add("grant_type", "authorization_code")
-	q.Add("redirect_uri", test.TestClient.AllowedRedirectUrls[0])
-	q.Add("scope", "profile contacts")
-	q.Add("state", "client-data")
-
-	req.URL.RawQuery = q.Encode()
+	req.URL.RawQuery = buildQueryStringWith("scope", "profile contacts").Encode()
 
 	resp, _ := httpClient().Do(req)
 
@@ -93,6 +126,23 @@ func TestAuthoriationRedirectsWithMultipleScopes(t *testing.T) {
 	assert.Equal(t, "test-id", qs.Get("client_id"))
 	assert.Equal(t, "profile contacts", qs.Get("requested_scopes"))
 	assert.NotEmpty(t, qs.Get("context"))
+}
+
+func buildQueryStringWith(overrideKey string, value string) url.Values {
+	q := buildQueryString()
+	q.Set(overrideKey, value)
+	return q
+}
+
+func buildQueryString() url.Values {
+	q := url.Values{}
+	q.Add("client_id", test.TestClient.ID)
+	q.Add("grant_type", "authorization_code")
+	q.Add("redirect_uri", test.TestClient.AllowedRedirectUrls[0])
+	q.Add("scope", "profile")
+	q.Add("state", "client-data")
+
+	return q
 }
 
 func httpClient() *http.Client {
