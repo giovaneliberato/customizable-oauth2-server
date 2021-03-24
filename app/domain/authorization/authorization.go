@@ -16,6 +16,12 @@ type AuthorizationRequest struct {
 	State       string
 }
 
+type ApproveAuthorizationRequest struct {
+	ApprovedByUser             bool
+	AuthorizationCode          string
+	SignedAuthorizationRequest string
+}
+
 type AuthozirationContext struct {
 	AuthorizationURL           string
 	ClientID                   string
@@ -23,8 +29,15 @@ type AuthozirationContext struct {
 	SignedAuthorizationRequest string
 }
 
+type AuthorizationReponse struct {
+	RedirectURI       string
+	State             string
+	AuthorizationCode string
+}
+
 type Service interface {
 	Authorize(AuthorizationRequest) (AuthozirationContext, *ValidationError)
+	ApproveAuthorization(ApproveAuthorizationRequest) (AuthorizationReponse, *ValidationError)
 }
 
 type service struct {
@@ -55,6 +68,29 @@ func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext,
 	}
 
 	return ctx, nil
+}
+
+func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorizationRequest) (AuthorizationReponse, *ValidationError) {
+	claims, err := s.tokenSigner.VerifyAndDecode(approveAuthorization.SignedAuthorizationRequest)
+
+	if err != nil {
+		return AuthorizationReponse{}, InvalidApproveAuthorizationError
+	}
+
+	if !approveAuthorization.ApprovedByUser {
+		resp := AuthorizationReponse{
+			RedirectURI: claims.RedirectURI,
+			State:       claims.State,
+		}
+
+		return resp, AuthorizationDeniedError
+	}
+
+	return AuthorizationReponse{
+		AuthorizationCode: approveAuthorization.AuthorizationCode,
+		State:             claims.State,
+		RedirectURI:       claims.RedirectURI,
+	}, nil
 }
 
 func (s *service) buildToken(req AuthorizationRequest) string {

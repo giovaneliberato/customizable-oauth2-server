@@ -20,6 +20,17 @@ func (v *ValidationError) Error() string {
 	return v.ErrorDescription
 }
 
+var InvalidApproveAuthorizationError = &ValidationError{
+	Err:              "invalid_request",
+	ErrorDescription: "Could not proccess approval request",
+	Abort:            true,
+}
+
+var AuthorizationDeniedError = &ValidationError{
+	Err:              "access_denied",
+	ErrorDescription: "The user or authorization server denied the request",
+}
+
 func Validate(client client.Client, data AuthorizationRequest) *ValidationError {
 	if client.ID == "" || client.ID != data.ClientID {
 		return &ValidationError{"invalid_request", "Invalid client details", true}
