@@ -7,3 +7,6 @@ jwt:
 
 authorization:
   consent-url: https://my-app.com/oauth2/authorize
+
+oauth2-server:
+  supported-grant-types: ["code"]
