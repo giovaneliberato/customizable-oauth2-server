@@ -13,14 +13,16 @@ type Service interface {
 }
 
 type service struct {
-	client      client.Service
-	tokenSigner TokenSigner
+	client           client.Service
+	tokenSigner      TokenSigner
+	authorizationURL string
 }
 
 func NewService(client client.Service, signer TokenSigner) Service {
 	return &service{
-		client:      client,
-		tokenSigner: signer,
+		client:           client,
+		tokenSigner:      signer,
+		authorizationURL: viper.GetString("authorization.consent-url"),
 	}
 }
 
@@ -33,7 +35,7 @@ func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext,
 	}
 
 	ctx := AuthozirationContext{
-		AuthorizationURL:           viper.GetString("authorization.consent-url"),
+		AuthorizationURL:           s.authorizationURL,
 		ClientID:                   client.ID,
 		RequestedScopes:            request.Scope,
 		SignedAuthorizationRequest: s.buildToken(request),
