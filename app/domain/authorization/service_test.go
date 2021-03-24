@@ -32,9 +32,9 @@ func TestBuildAuthorizationContext(t *testing.T) {
 	service := authorization.NewService(clientServiceMock, authorization.NewTokenSigner())
 
 	req := authorization.AuthorizationRequest{
-		ClientID:    "test-id",
-		RedirectURI: "https://test.client/oauth2-callback",
-		GrantType:   "authorization_code",
+		ClientID:    test.TestClient.ID,
+		RedirectURI: test.TestClient.AllowedRedirectUrls[0],
+		GrantType:   "code",
 		State:       "client-state",
 		Scope:       []string{"profile"},
 	}
@@ -122,9 +122,9 @@ func TestSuccessfulAuthorization(t *testing.T) {
 
 func buildAuthorizationRequest() authorization.AuthorizationRequest {
 	return authorization.AuthorizationRequest{
-		ClientID:    "test-id",
-		RedirectURI: "https://test.client/oauth2-callback",
-		GrantType:   "authorization_code",
+		ClientID:    test.TestClient.ID,
+		RedirectURI: test.TestClient.AllowedRedirectUrls[0],
+		GrantType:   test.TestClient.AllowedGrantTypes[0],
 		State:       "client-state",
 		Scope:       []string{"profile"},
 	}

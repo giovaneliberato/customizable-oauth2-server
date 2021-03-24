@@ -64,7 +64,7 @@ func TestUnsupportedGrantType(t *testing.T) {
 	assert.False(t, err.Empty())
 	assert.False(t, err.Abort)
 	assert.Equal(t, "unsupported_response_type", err.Err)
-	assert.Equal(t, "Unsupported grant type", err.ErrorDescription)
+	assert.Equal(t, "Unsupported response type", err.ErrorDescription)
 }
 
 func TestUnsupportedScopeNoneMatch(t *testing.T) {
@@ -89,7 +89,7 @@ func TestUnsupportedScopeOneMatch(t *testing.T) {
 	req := authorization.AuthorizationRequest{
 		ClientID:    "test-id",
 		RedirectURI: "https://test.client/oauth2-callback",
-		GrantType:   "authorization_code",
+		GrantType:   "code",
 		Scope:       []string{"profile", "admin-password"},
 	}
 

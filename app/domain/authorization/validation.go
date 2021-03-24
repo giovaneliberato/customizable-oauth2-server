@@ -2,50 +2,21 @@ package authorization
 
 import "goauth-extension/app/domain/client"
 
-type ValidationError struct {
-	Err              string `json:"error,omitempty"`
-	ErrorDescription string `json:"error_description,omitempty"`
-	Abort            bool   `json:"-"`
-}
-
-func (v *ValidationError) Empty() bool {
-	return v.Err == ""
-}
-
-func (v *ValidationError) HasErrors() bool {
-	return !v.Empty()
-}
-
-func (v *ValidationError) Error() string {
-	return v.ErrorDescription
-}
-
-var InvalidApproveAuthorizationError = &ValidationError{
-	Err:              "invalid_request",
-	ErrorDescription: "Could not proccess approval request",
-	Abort:            true,
-}
-
-var AuthorizationDeniedError = &ValidationError{
-	Err:              "access_denied",
-	ErrorDescription: "The user or authorization server denied the request",
-}
-
-func Validate(client client.Client, data AuthorizationRequest) *ValidationError {
+func Validate(client client.Client, data AuthorizationRequest) *AuthorizationError {
 	if client.ID == "" || client.ID != data.ClientID {
-		return &ValidationError{"invalid_request", "Invalid client details", true}
+		return InvalidClientError
 	}
 
 	if notIn(data.RedirectURI, client.AllowedRedirectUrls) {
-		return &ValidationError{"invalid_request", "Invalid client details", true}
+		return InvalidClientError
 	}
 
 	if notIn(data.GrantType, client.AllowedGrantTypes) {
-		return &ValidationError{"unsupported_response_type", "Unsupported grant type", false}
+		return UnsupportedResponseTypeError
 	}
 
 	if oneItemNotIn(data.Scope, client.AllowedScopes) {
-		return &ValidationError{"invalid_scope", "Requested scopes are not valid", false}
+		return InvalidScopeError
 	}
 
 	return nil

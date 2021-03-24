@@ -7,8 +7,9 @@ import (
 )
 
 type Service interface {
-	Authorize(AuthorizationRequest) (AuthozirationContext, *ValidationError)
-	ApproveAuthorization(ApproveAuthorizationRequest) (AuthorizationReponse, *ValidationError)
+	Authorize(AuthorizationRequest) (AuthozirationContext, *AuthorizationError)
+	ApproveAuthorization(ApproveAuthorizationRequest) (AuthorizationReponse, *AuthorizationError)
+	//ExchangeAuthorizationCode() (AuthorizationReponse, *AuthorizationError)
 }
 
 type service struct {
@@ -23,7 +24,7 @@ func NewService(client client.Service, signer TokenSigner) Service {
 	}
 }
 
-func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext, *ValidationError) {
+func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext, *AuthorizationError) {
 	client := s.client.GetByID(request.ClientID)
 
 	err := Validate(client, request)
@@ -41,7 +42,7 @@ func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext,
 	return ctx, nil
 }
 
-func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorizationRequest) (AuthorizationReponse, *ValidationError) {
+func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorizationRequest) (AuthorizationReponse, *AuthorizationError) {
 	claims, err := s.tokenSigner.VerifyAndDecode(approveAuthorization.SignedAuthorizationRequest)
 
 	if err != nil {
@@ -54,7 +55,7 @@ func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorization
 			State:       claims.State,
 		}
 
-		return resp, AuthorizationDeniedError
+		return resp, AccessDeniedError
 	}
 
 	signedAuthorizationCode := s.buildAuthorizationCodeToken(claims, approveAuthorization)

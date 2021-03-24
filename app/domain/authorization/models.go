@@ -26,3 +26,11 @@ type AuthorizationReponse struct {
 	State                   string
 	SignedAuthorizationCode string
 }
+
+type ExchangeAuthorizationCode struct {
+	ClientID                string
+	ClientSecret            string
+	GrantType               string
+	State                   string
+	SignedAuthorizationCode string
+}

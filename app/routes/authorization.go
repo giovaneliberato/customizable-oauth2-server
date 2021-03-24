@@ -65,7 +65,7 @@ func (a *authorizationRoutes) ProcessAuthorization(w http.ResponseWriter, r *htt
 	http.Redirect(w, r, redirectURI, http.StatusFound)
 }
 
-func proccessError(w http.ResponseWriter, r *http.Request, errorRedirectURL, state string, err *authorization.ValidationError) {
+func proccessError(w http.ResponseWriter, r *http.Request, errorRedirectURL, state string, err *authorization.AuthorizationError) {
 	if err.Abort {
 		// This avoid open redirect attacks
 		jsonBody, _ := json.Marshal(err)

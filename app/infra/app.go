@@ -3,7 +3,6 @@ package infra
 import (
 	"goauth-extension/app/domain/authorization"
 	"goauth-extension/app/domain/client"
-	"goauth-extension/app/domain/token"
 	"goauth-extension/app/routes"
 
 	"github.com/golobby/container/v2"
@@ -11,7 +10,7 @@ import (
 
 var componentProviders = []interface{}{
 	// domain
-	token.NewTokenSigner,
+	authorization.NewTokenSigner,
 	client.NewRepository,
 	client.NewService,
 	authorization.NewService,
