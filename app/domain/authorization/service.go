@@ -7,34 +7,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Authorization representing the data sent in the first request of the protocol
-type AuthorizationRequest struct {
-	ClientID    string
-	GrantType   string
-	RedirectURI string
-	Scope       []string
-	State       string
-}
-
-type ApproveAuthorizationRequest struct {
-	ApprovedByUser             bool
-	AuthorizationCode          string
-	SignedAuthorizationRequest string
-}
-
-type AuthozirationContext struct {
-	AuthorizationURL           string
-	ClientID                   string
-	RequestedScopes            []string
-	SignedAuthorizationRequest string
-}
-
-type AuthorizationReponse struct {
-	RedirectURI             string
-	State                   string
-	SignedAuthorizationCode string
-}
-
 type Service interface {
 	Authorize(AuthorizationRequest) (AuthozirationContext, *ValidationError)
 	ApproveAuthorization(ApproveAuthorizationRequest) (AuthorizationReponse, *ValidationError)
