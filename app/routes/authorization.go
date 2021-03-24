@@ -5,6 +5,7 @@ import (
 	"goauth-extension/app/domain/authorization"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/go-chi/chi"
@@ -19,7 +20,7 @@ func AuthorizationRouter() chi.Router {
 	container.Make(&route)
 
 	router.Get("/oauth2/authorize", route.Authorize)
-	router.Post("/oauth2/authorize-callback", route.ProcessAuthorization)
+	router.Post("/oauth2/approve-authorization", route.ProcessAuthorization)
 
 	return router
 }
@@ -45,17 +46,42 @@ func (a *routes) Authorize(w http.ResponseWriter, r *http.Request) {
 	context, err := a.service.Authorize(authRequest)
 
 	if err != nil {
-		jsonBody, _ := json.Marshal(err)
-		http.Error(w, string(jsonBody), http.StatusUnauthorized)
+		proccessError(w, r, authRequest.RedirectURI, authRequest.State, err)
 		return
 	}
 
-	redirectURI := buildRedirectURI(context)
+	redirectURI := buildApprovalRedirectURI(context)
 
 	http.Redirect(w, r, redirectURI, http.StatusFound)
 }
 
 func (a *routes) ProcessAuthorization(w http.ResponseWriter, r *http.Request) {
+	approvalRequest := parseForm(r)
+	resp, err := a.service.ApproveAuthorization(approvalRequest)
+
+	if err != nil {
+		proccessError(w, r, resp.RedirectURI, resp.State, err)
+		return
+	}
+
+	redirectURI := buildClientCallbackRedirectURI(resp)
+
+	http.Redirect(w, r, redirectURI, http.StatusFound)
+}
+
+func proccessError(w http.ResponseWriter, r *http.Request, errorRedirectURL, state string, err *authorization.ValidationError) {
+	if err.Abort {
+		// This avoid open redirect attacks
+		jsonBody, _ := json.Marshal(err)
+		http.Error(w, string(jsonBody), http.StatusUnauthorized)
+	} else {
+		qs := url.Values{}
+		qs.Add("error", err.Err)
+		qs.Add("error_description", err.ErrorDescription)
+		qs.Add("state", state)
+		errorRedirectURL += "?" + qs.Encode()
+		http.Redirect(w, r, errorRedirectURL, http.StatusFound)
+	}
 }
 
 func parse(qs url.Values) authorization.AuthorizationRequest {
@@ -68,11 +94,28 @@ func parse(qs url.Values) authorization.AuthorizationRequest {
 	}
 }
 
-func buildRedirectURI(ctx authorization.AuthozirationContext) string {
+func parseForm(r *http.Request) authorization.ApproveAuthorizationRequest {
+	approved, _ := strconv.ParseBool(r.FormValue("approved"))
+	return authorization.ApproveAuthorizationRequest{
+		ApprovedByUser:             approved,
+		AuthorizationCode:          r.FormValue("authorization_code"),
+		SignedAuthorizationRequest: r.FormValue("signed_context"),
+	}
+}
+
+func buildApprovalRedirectURI(ctx authorization.AuthozirationContext) string {
 	qs := url.Values{}
 	qs.Add("client_id", ctx.ClientID)
 	qs.Add("requested_scopes", strings.Join(ctx.RequestedScopes, " "))
-	qs.Add("context", ctx.SignedAuthorizationRequest)
+	qs.Add("signed_context", ctx.SignedAuthorizationRequest)
 
 	return ctx.AuthorizationURL + "?" + qs.Encode()
+}
+
+func buildClientCallbackRedirectURI(resp authorization.AuthorizationReponse) string {
+	qs := url.Values{}
+	qs.Add("state", resp.State)
+	qs.Add("code", resp.SignedAuthorizationCode)
+
+	return resp.RedirectURI + "?" + qs.Encode()
 }

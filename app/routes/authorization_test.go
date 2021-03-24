@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"goauth-extension/app/domain/authorization"
 	"goauth-extension/app/infra"
+	"goauth-extension/app/infra/token"
 	"goauth-extension/app/routes"
 	"goauth-extension/app/test"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -59,13 +61,15 @@ func TestUnsupportedGrantType(t *testing.T) {
 	req.URL.RawQuery = buildQueryStringWith("grant_type", "invalid_grant").Encode()
 
 	resp, _ := httpClient().Do(req)
-	var respBody authorization.ValidationError
 
-	json.NewDecoder(resp.Body).Decode(&respBody)
+	redirectURL := resp.Header.Get("Location")
+	url, _ := url.Parse(redirectURL)
+	qs := url.Query()
 
-	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
-	assert.Empty(t, resp.Header.Get("Location"))
-	assert.Equal(t, "unsupported_response_type", respBody.Err)
+	assert.Equal(t, test.TestClient.AllowedRedirectUrls[0], strings.Split(url.String(), "?")[0])
+	assert.Equal(t, http.StatusFound, resp.StatusCode)
+	assert.Equal(t, "unsupported_response_type", qs.Get("error"))
+	assert.Equal(t, "client-data", qs.Get("state"))
 }
 
 func TestInvalidScope(t *testing.T) {
@@ -77,16 +81,18 @@ func TestInvalidScope(t *testing.T) {
 	req.URL.RawQuery = buildQueryStringWith("scope", "everythingggggg").Encode()
 
 	resp, _ := httpClient().Do(req)
-	var respBody authorization.ValidationError
 
-	json.NewDecoder(resp.Body).Decode(&respBody)
+	redirectURL := resp.Header.Get("Location")
+	url, _ := url.Parse(redirectURL)
+	qs := url.Query()
 
-	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
-	assert.Empty(t, resp.Header.Get("Location"))
-	assert.Equal(t, "invalid_scope", respBody.Err)
+	assert.Equal(t, test.TestClient.AllowedRedirectUrls[0], strings.Split(url.String(), "?")[0])
+	assert.Equal(t, http.StatusFound, resp.StatusCode)
+	assert.Equal(t, "invalid_scope", qs.Get("error"))
+	assert.Equal(t, "client-data", qs.Get("state"))
 }
 
-func TestAuthoriationRedirects(t *testing.T) {
+func TestAuthoriationRedirectsToApproval(t *testing.T) {
 	infra.InitApplication()
 	server := httptest.NewServer(routes.AuthorizationRouter())
 	defer server.Close()
@@ -104,10 +110,10 @@ func TestAuthoriationRedirects(t *testing.T) {
 	assert.Equal(t, "/oauth2/authorize", url.Path)
 	assert.Equal(t, "test-id", qs.Get("client_id"))
 	assert.Equal(t, "profile", qs.Get("requested_scopes"))
-	assert.NotEmpty(t, qs.Get("context"))
+	assert.NotEmpty(t, qs.Get("signed_context"))
 }
 
-func TestAuthoriationRedirectsWithMultipleScopes(t *testing.T) {
+func TestAuthoriationRedirectsToApprovalWithMultipleScopes(t *testing.T) {
 	infra.InitApplication()
 	server := httptest.NewServer(routes.AuthorizationRouter())
 	defer server.Close()
@@ -125,7 +131,70 @@ func TestAuthoriationRedirectsWithMultipleScopes(t *testing.T) {
 	assert.Equal(t, "/oauth2/authorize", url.Path)
 	assert.Equal(t, "test-id", qs.Get("client_id"))
 	assert.Equal(t, "profile contacts", qs.Get("requested_scopes"))
-	assert.NotEmpty(t, qs.Get("context"))
+	assert.NotEmpty(t, qs.Get("signed_context"))
+}
+
+func TestUnsuccessfulAuthorization(t *testing.T) {
+	infra.InitApplication()
+	server := httptest.NewServer(routes.AuthorizationRouter())
+	defer server.Close()
+
+	req, _ := http.NewRequest("POST", server.URL+"/oauth2/approve-authorization", nil)
+	req.PostForm = make(url.Values)
+	req.PostForm.Add("approved", "true")
+	req.PostForm.Add("authorization_code", "3CJu2J5Yix8tQw")
+	req.PostForm.Add("signed_context", generateValidSignedContext()+"tampered")
+
+	resp, _ := httpClient().Do(req)
+	var respBody authorization.ValidationError
+
+	json.NewDecoder(resp.Body).Decode(&respBody)
+
+	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+	assert.Empty(t, resp.Header.Get("Location"))
+	assert.Equal(t, "invalid_request", respBody.Err)
+}
+
+func TestUnnaprovedAuthorization(t *testing.T) {
+	infra.InitApplication()
+	server := httptest.NewServer(routes.AuthorizationRouter())
+	defer server.Close()
+
+	form := url.Values{}
+	form.Add("approved", "false")
+	form.Add("authorization_code", "3CJu2J5Yix8tQw")
+	form.Add("signed_context", generateValidSignedContext())
+	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
+
+	redirectURL := resp.Header.Get("Location")
+	url, _ := url.Parse(redirectURL)
+	qs := url.Query()
+
+	assert.Equal(t, test.TestClient.AllowedRedirectUrls[0], strings.Split(url.String(), "?")[0])
+	assert.Equal(t, http.StatusFound, resp.StatusCode)
+	assert.Equal(t, "access_denied", qs.Get("error"))
+	assert.Equal(t, "state", qs.Get("state"))
+}
+
+func TestSuccessfulAuthorizationRedirectsClient(t *testing.T) {
+	infra.InitApplication()
+	server := httptest.NewServer(routes.AuthorizationRouter())
+	defer server.Close()
+
+	form := url.Values{}
+	form.Add("approved", "true")
+	form.Add("authorization_code", "3CJu2J5Yix8tQw")
+	form.Add("signed_context", generateValidSignedContext())
+	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
+
+	redirectURL := resp.Header.Get("Location")
+	url, _ := url.Parse(redirectURL)
+	qs := url.Query()
+
+	assert.Equal(t, test.TestClient.AllowedRedirectUrls[0], strings.Split(url.String(), "?")[0])
+	assert.Equal(t, http.StatusFound, resp.StatusCode)
+	assert.Equal(t, "state", qs.Get("state"))
+	assert.NotEmpty(t, qs.Get("code"))
 }
 
 func buildQueryStringWith(overrideKey string, value string) url.Values {
@@ -151,4 +220,16 @@ func httpClient() *http.Client {
 			return http.ErrUseLastResponse
 		},
 	}
+}
+
+func generateValidSignedContext() string {
+	signer := token.NewTokenSigner()
+	claims := token.ContextClaims{
+		ClientID:    test.TestClient.ID,
+		State:       "state",
+		Scope:       []string{"profile"},
+		RedirectURI: test.TestClient.AllowedRedirectUrls[0],
+	}
+	signedContext, _ := signer.SignAndEncode(claims)
+	return signedContext
 }
