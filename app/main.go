@@ -4,9 +4,19 @@ import (
 	"goauth-extension/app/infra"
 	"goauth-extension/app/routes"
 	"net/http"
+
+	"github.com/go-chi/chi"
 )
 
 func main() {
 	infra.InitApplication()
-	http.ListenAndServe(":3000", routes.AuthorizationRouter())
+
+	appRouter := chi.NewRouter()
+	managementRouter := chi.NewRouter()
+
+	routes.ConfigApplicationRoutes(appRouter)
+	routes.ConfigManagementRoutes(managementRouter)
+
+	http.ListenAndServe(":8080", appRouter)
+	http.ListenAndServe(":8081", managementRouter)
 }

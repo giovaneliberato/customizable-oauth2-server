@@ -2,7 +2,7 @@ package authorization
 
 import (
 	"goauth-extension/app/domain/client"
-	"goauth-extension/app/infra/token"
+	"goauth-extension/app/domain/token"
 
 	"github.com/spf13/viper"
 )

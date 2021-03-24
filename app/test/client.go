@@ -17,7 +17,8 @@ func (m *ClientServiceMock) GetByID(ID string) client.Client {
 
 var TestClient = client.Client{
 	ID:                  "test-id",
+	RawSecret:           "secret",
 	AllowedRedirectUrls: []string{"https://test.client/oauth2-callback"},
-	AllowedGrantTypes:   []string{"authorization_code"},
-	AllowedScopes:       []string{"profile"},
+	AllowedGrantTypes:   []string{"code"},
+	AllowedScopes:       []string{"profile", "contacts", "messages"},
 }

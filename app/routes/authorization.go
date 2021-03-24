@@ -13,16 +13,13 @@ import (
 )
 
 // AuthorizationRoutes returns a chi.Router with all authorization routes mapped
-func AuthorizationRouter() chi.Router {
-	router := chi.NewRouter()
+func AuthorizationRouter(r *chi.Mux) {
 
 	var route AuthorizationRoutes
 	container.Make(&route)
 
-	router.Get("/oauth2/authorize", route.Authorize)
-	router.Post("/oauth2/approve-authorization", route.ProcessAuthorization)
-
-	return router
+	r.Get("/oauth2/authorize", route.Authorize)
+	r.Post("/oauth2/approve-authorization", route.ProcessAuthorization)
 }
 
 type AuthorizationRoutes interface {
@@ -87,7 +84,7 @@ func proccessError(w http.ResponseWriter, r *http.Request, errorRedirectURL, sta
 func parse(qs url.Values) authorization.AuthorizationRequest {
 	return authorization.AuthorizationRequest{
 		ClientID:    qs.Get("client_id"),
-		GrantType:   qs.Get("grant_type"),
+		GrantType:   qs.Get("response_type"),
 		RedirectURI: qs.Get("redirect_uri"),
 		Scope:       strings.Split(qs.Get("scope"), " "),
 		State:       qs.Get("state"),
