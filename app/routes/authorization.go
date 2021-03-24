@@ -12,7 +12,6 @@ import (
 	"github.com/golobby/container/v2"
 )
 
-// AuthorizationRoutes returns a chi.Router with all authorization routes mapped
 func AuthorizationRouter(r *chi.Mux) {
 
 	var route AuthorizationRoutes
@@ -27,17 +26,17 @@ type AuthorizationRoutes interface {
 	ProcessAuthorization(http.ResponseWriter, *http.Request)
 }
 
-type routes struct {
+type authorizationRoutes struct {
 	service authorization.Service
 }
 
 func NewAuthorizationRoutes(service authorization.Service) AuthorizationRoutes {
-	return &routes{
+	return &authorizationRoutes{
 		service: service,
 	}
 }
 
-func (a *routes) Authorize(w http.ResponseWriter, r *http.Request) {
+func (a *authorizationRoutes) Authorize(w http.ResponseWriter, r *http.Request) {
 	authRequest := parse(r.URL.Query())
 
 	context, err := a.service.Authorize(authRequest)
@@ -52,7 +51,7 @@ func (a *routes) Authorize(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, redirectURI, http.StatusFound)
 }
 
-func (a *routes) ProcessAuthorization(w http.ResponseWriter, r *http.Request) {
+func (a *authorizationRoutes) ProcessAuthorization(w http.ResponseWriter, r *http.Request) {
 	approvalRequest := parseForm(r)
 	resp, err := a.service.ApproveAuthorization(approvalRequest)
 

@@ -18,6 +18,7 @@ var componentProviders = []interface{}{
 
 	//routes
 	routes.NewAuthorizationRoutes,
+	routes.NewClientRoutes,
 }
 
 func InitializeComponents() {

@@ -3,6 +3,7 @@ package authorization_test
 import (
 	"goauth-extension/app/domain/authorization"
 	"goauth-extension/app/domain/client"
+	"goauth-extension/app/test"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,7 +23,7 @@ func TestInvalidClient(t *testing.T) {
 }
 
 func TestInvalidClientID(t *testing.T) {
-	client := BuildTestClient()
+	client := test.TestClient
 	req := authorization.AuthorizationRequest{
 		ClientID: "non-existent-client",
 	}
@@ -36,7 +37,7 @@ func TestInvalidClientID(t *testing.T) {
 }
 
 func TestRedirectUrl(t *testing.T) {
-	client := BuildTestClient()
+	client := test.TestClient
 	req := authorization.AuthorizationRequest{
 		ClientID:    "test-id",
 		RedirectURI: "https://malicious.domain/oauth-callback",
@@ -51,10 +52,10 @@ func TestRedirectUrl(t *testing.T) {
 }
 
 func TestUnsupportedGrantType(t *testing.T) {
-	client := BuildTestClient()
+	client := test.TestClient
 	req := authorization.AuthorizationRequest{
-		ClientID:    "test-id",
-		RedirectURI: "https://test.client/oauth2-callback",
+		ClientID:    client.ID,
+		RedirectURI: client.AllowedRedirectUrls[0],
 		GrantType:   "implicit",
 	}
 
@@ -67,11 +68,11 @@ func TestUnsupportedGrantType(t *testing.T) {
 }
 
 func TestUnsupportedScopeNoneMatch(t *testing.T) {
-	client := BuildTestClient()
+	client := test.TestClient
 	req := authorization.AuthorizationRequest{
-		ClientID:    "test-id",
-		RedirectURI: "https://test.client/oauth2-callback",
-		GrantType:   "authorization_code",
+		ClientID:    client.ID,
+		RedirectURI: client.AllowedRedirectUrls[0],
+		GrantType:   "code",
 		Scope:       []string{"admin-password"},
 	}
 
@@ -84,7 +85,7 @@ func TestUnsupportedScopeNoneMatch(t *testing.T) {
 }
 
 func TestUnsupportedScopeOneMatch(t *testing.T) {
-	client := BuildTestClient()
+	client := test.TestClient
 	req := authorization.AuthorizationRequest{
 		ClientID:    "test-id",
 		RedirectURI: "https://test.client/oauth2-callback",
@@ -101,11 +102,11 @@ func TestUnsupportedScopeOneMatch(t *testing.T) {
 }
 
 func TestSupportedScopeOneMatch(t *testing.T) {
-	client := BuildTestClient()
+	client := test.TestClient
 	req := authorization.AuthorizationRequest{
-		ClientID:    "test-id",
-		RedirectURI: "https://test.client/oauth2-callback",
-		GrantType:   "authorization_code",
+		ClientID:    client.ID,
+		RedirectURI: client.AllowedRedirectUrls[0],
+		GrantType:   "code",
 		Scope:       []string{"profile"},
 	}
 
@@ -114,12 +115,12 @@ func TestSupportedScopeOneMatch(t *testing.T) {
 }
 
 func TestSupportedScopeTwoMatch(t *testing.T) {
-	client := BuildTestClient()
+	client := test.TestClient
 	req := authorization.AuthorizationRequest{
-		ClientID:    "test-id",
-		RedirectURI: "https://test.client/oauth2-callback",
-		GrantType:   "authorization_code",
-		Scope:       []string{"profile", "orders"},
+		ClientID:    client.ID,
+		RedirectURI: client.AllowedRedirectUrls[0],
+		GrantType:   "code",
+		Scope:       []string{"profile", "messages"},
 	}
 
 	err := authorization.Validate(client, req)
@@ -127,24 +128,14 @@ func TestSupportedScopeTwoMatch(t *testing.T) {
 }
 
 func TestSupportedScopeAllMatch(t *testing.T) {
-	client := BuildTestClient()
+	client := test.TestClient
 	req := authorization.AuthorizationRequest{
-		ClientID:    "test-id",
-		RedirectURI: "https://test.client/oauth2-callback",
-		GrantType:   "authorization_code",
-		Scope:       []string{"profile", "orders", "messages"},
+		ClientID:    client.ID,
+		RedirectURI: client.AllowedRedirectUrls[0],
+		GrantType:   "code",
+		Scope:       []string{"profile", "contacts", "messages"},
 	}
 
 	err := authorization.Validate(client, req)
 	assert.Nil(t, err)
-}
-
-func BuildTestClient() client.Client {
-	return client.Client{
-		ID:                  "test-id",
-		Secret:              "secret",
-		AllowedRedirectUrls: []string{"https://test.client/oauth2-callback"},
-		AllowedGrantTypes:   []string{"authorization_code"},
-		AllowedScopes:       []string{"profile", "orders", "messages"},
-	}
 }

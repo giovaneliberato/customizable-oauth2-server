@@ -14,9 +14,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var server = test.TestServerFor(routes.AuthorizationRouter)
-
 func TestInvalidClientID(t *testing.T) {
+	var server = test.TestServerFor(routes.AuthorizationRouter)
 	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
 	req.URL.RawQuery = buildQueryStringWith("client_id", "invalid").Encode()
 
@@ -31,6 +30,7 @@ func TestInvalidClientID(t *testing.T) {
 }
 
 func TestInvalidRedirectURL(t *testing.T) {
+	var server = test.TestServerFor(routes.AuthorizationRouter)
 	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
 	req.URL.RawQuery = buildQueryStringWith("redirect_uri", "not even a url").Encode()
 
@@ -45,6 +45,7 @@ func TestInvalidRedirectURL(t *testing.T) {
 }
 
 func TestUnsupportedGrantType(t *testing.T) {
+	var server = test.TestServerFor(routes.AuthorizationRouter)
 	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
 	req.URL.RawQuery = buildQueryStringWith("response_type", "invalid_grant").Encode()
 
@@ -61,6 +62,7 @@ func TestUnsupportedGrantType(t *testing.T) {
 }
 
 func TestInvalidScope(t *testing.T) {
+	var server = test.TestServerFor(routes.AuthorizationRouter)
 	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
 	req.URL.RawQuery = buildQueryStringWith("scope", "everythingggggg").Encode()
 
@@ -77,6 +79,7 @@ func TestInvalidScope(t *testing.T) {
 }
 
 func TestAuthoriationRedirectsToApproval(t *testing.T) {
+	var server = test.TestServerFor(routes.AuthorizationRouter)
 	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
 	req.URL.RawQuery = buildQueryStringWith("scope", "profile").Encode()
 
@@ -94,6 +97,7 @@ func TestAuthoriationRedirectsToApproval(t *testing.T) {
 }
 
 func TestAuthoriationRedirectsToApprovalWithMultipleScopes(t *testing.T) {
+	var server = test.TestServerFor(routes.AuthorizationRouter)
 	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
 	req.URL.RawQuery = buildQueryStringWith("scope", "profile contacts").Encode()
 
@@ -111,6 +115,7 @@ func TestAuthoriationRedirectsToApprovalWithMultipleScopes(t *testing.T) {
 }
 
 func TestUnsuccessfulAuthorization(t *testing.T) {
+	var server = test.TestServerFor(routes.AuthorizationRouter)
 	req, _ := http.NewRequest("POST", server.URL+"/oauth2/approve-authorization", nil)
 	req.PostForm = make(url.Values)
 	req.PostForm.Add("approved", "true")
@@ -128,6 +133,7 @@ func TestUnsuccessfulAuthorization(t *testing.T) {
 }
 
 func TestUnnaprovedAuthorization(t *testing.T) {
+	var server = test.TestServerFor(routes.AuthorizationRouter)
 	form := url.Values{}
 	form.Add("approved", "false")
 	form.Add("authorization_code", "3CJu2J5Yix8tQw")
@@ -145,6 +151,7 @@ func TestUnnaprovedAuthorization(t *testing.T) {
 }
 
 func TestSuccessfulAuthorizationRedirectsClient(t *testing.T) {
+	var server = test.TestServerFor(routes.AuthorizationRouter)
 	form := url.Values{}
 	form.Add("approved", "true")
 	form.Add("authorization_code", "3CJu2J5Yix8tQw")

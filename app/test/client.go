@@ -15,6 +15,14 @@ func (m *ClientServiceMock) GetByID(ID string) client.Client {
 	return m.Return
 }
 
+func (m *ClientServiceMock) Save(client.Client) error {
+	return nil
+}
+
+func (m *ClientServiceMock) ValidateSecret(c client.Client, secret string) error {
+	return nil
+}
+
 var TestClient = client.Client{
 	ID:                  "test-id",
 	RawSecret:           "secret",

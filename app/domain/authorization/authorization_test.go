@@ -3,8 +3,8 @@ package authorization_test
 import (
 	"goauth-extension/app/domain/authorization"
 	"goauth-extension/app/domain/client"
+	"goauth-extension/app/domain/token"
 	"goauth-extension/app/infra"
-	"goauth-extension/app/infra/token"
 	"goauth-extension/app/test"
 	"testing"
 
@@ -29,6 +29,7 @@ func TestBuildAuthorizationContext(t *testing.T) {
 	infra.LoadConfig()
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
+
 	service := authorization.NewService(clientServiceMock, token.NewTokenSigner())
 
 	req := authorization.AuthorizationRequest{

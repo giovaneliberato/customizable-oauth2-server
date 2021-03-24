@@ -9,20 +9,45 @@ import (
 )
 
 func TestClientWithUnsupportedGrantType(t *testing.T) {
+	infra.LoadConfig()
 	service := client.NewService(client.NewRepository())
 
-	err := service.Save(&client.Client{
+	err := service.Save(client.Client{
 		AllowedGrantTypes: []string{"implicit"},
 	})
 	assert.NotNil(t, err)
 }
 
 func TestClientWithoutRedirectURLs(t *testing.T) {
+	infra.LoadConfig()
 	service := client.NewService(client.NewRepository())
 
-	err := service.Save(&client.Client{
-		AllowedGrantTypes:   []string{"authorization_code"},
+	err := service.Save(client.Client{
+		AllowedGrantTypes:   []string{"code"},
 		AllowedRedirectUrls: []string{},
+	})
+	assert.NotNil(t, err)
+}
+
+func TestClientWithEmptyStringAsUrl(t *testing.T) {
+	infra.LoadConfig()
+	service := client.NewService(client.NewRepository())
+
+	err := service.Save(client.Client{
+		ID:                  "client-id",
+		AllowedScopes:       []string{"profile"},
+		AllowedGrantTypes:   []string{"code"},
+		AllowedRedirectUrls: []string{""},
+	})
+	assert.NotNil(t, err)
+}
+
+func TestClientWithInvalidRedirectURLs(t *testing.T) {
+	service := client.NewService(client.NewRepository())
+
+	err := service.Save(client.Client{
+		AllowedGrantTypes:   []string{"code"},
+		AllowedRedirectUrls: []string{"https://not an url"},
 	})
 	assert.NotNil(t, err)
 }
@@ -30,7 +55,7 @@ func TestClientWithoutRedirectURLs(t *testing.T) {
 func TestClientWithoutScopes(t *testing.T) {
 	service := client.NewService(client.NewRepository())
 
-	err := service.Save(&client.Client{
+	err := service.Save(client.Client{
 		AllowedGrantTypes:   []string{"authorization_code"},
 		AllowedRedirectUrls: []string{"https://my-app.com"},
 		AllowedScopes:       []string{},
@@ -42,7 +67,7 @@ func TestClientSuccess(t *testing.T) {
 	infra.LoadConfig()
 	service := client.NewService(client.NewRepository())
 
-	err := service.Save(&client.Client{
+	err := service.Save(client.Client{
 		ID:                  "client-id",
 		AllowedGrantTypes:   []string{"code"},
 		AllowedRedirectUrls: []string{"https://my-app.com"},
