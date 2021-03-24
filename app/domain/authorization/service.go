@@ -2,7 +2,6 @@ package authorization
 
 import (
 	"goauth-extension/app/domain/client"
-	"goauth-extension/app/domain/token"
 
 	"github.com/spf13/viper"
 )
@@ -14,10 +13,10 @@ type Service interface {
 
 type service struct {
 	client      client.Service
-	tokenSigner token.TokenSigner
+	tokenSigner TokenSigner
 }
 
-func NewService(client client.Service, signer token.TokenSigner) Service {
+func NewService(client client.Service, signer TokenSigner) Service {
 	return &service{
 		client:      client,
 		tokenSigner: signer,
@@ -68,7 +67,7 @@ func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorization
 }
 
 func (s *service) buildToken(req AuthorizationRequest) string {
-	claims := token.ContextClaims{
+	claims := ContextClaims{
 		ClientID:    req.ClientID,
 		State:       req.State,
 		Scope:       req.Scope,
@@ -79,8 +78,8 @@ func (s *service) buildToken(req AuthorizationRequest) string {
 	return tokenString
 }
 
-func (s *service) buildAuthorizationCodeToken(ctx token.ContextClaims, approveAuthorization ApproveAuthorizationRequest) string {
-	claims := token.ContextClaims{
+func (s *service) buildAuthorizationCodeToken(ctx ContextClaims, approveAuthorization ApproveAuthorizationRequest) string {
+	claims := ContextClaims{
 		ClientID:          ctx.ClientID,
 		Scope:             ctx.Scope,
 		RedirectURI:       ctx.RedirectURI,

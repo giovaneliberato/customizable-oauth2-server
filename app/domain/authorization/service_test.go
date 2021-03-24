@@ -3,7 +3,6 @@ package authorization_test
 import (
 	"goauth-extension/app/domain/authorization"
 	"goauth-extension/app/domain/client"
-	"goauth-extension/app/domain/token"
 	"goauth-extension/app/infra"
 	"goauth-extension/app/test"
 	"testing"
@@ -17,7 +16,7 @@ func TestNotBuildConsentContextIfValidationFails(t *testing.T) {
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = client.Client{}
 
-	service := authorization.NewService(clientServiceMock, token.NewTokenSigner())
+	service := authorization.NewService(clientServiceMock, authorization.NewTokenSigner())
 
 	ctx, err := service.Authorize(authorization.AuthorizationRequest{})
 
@@ -30,7 +29,7 @@ func TestBuildAuthorizationContext(t *testing.T) {
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
 
-	service := authorization.NewService(clientServiceMock, token.NewTokenSigner())
+	service := authorization.NewService(clientServiceMock, authorization.NewTokenSigner())
 
 	req := authorization.AuthorizationRequest{
 		ClientID:    "test-id",
@@ -53,7 +52,7 @@ func TestRejectApproveAuthorizationIfSignatureIsInvalid(t *testing.T) {
 	infra.LoadConfig()
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
-	service := authorization.NewService(clientServiceMock, token.NewTokenSigner())
+	service := authorization.NewService(clientServiceMock, authorization.NewTokenSigner())
 
 	ctx, _ := service.Authorize(buildAuthorizationRequest())
 
@@ -73,7 +72,7 @@ func TestDeniedAuthorization(t *testing.T) {
 	infra.LoadConfig()
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
-	service := authorization.NewService(clientServiceMock, token.NewTokenSigner())
+	service := authorization.NewService(clientServiceMock, authorization.NewTokenSigner())
 
 	req := buildAuthorizationRequest()
 	ctx, _ := service.Authorize(req)
@@ -97,8 +96,8 @@ func TestSuccessfulAuthorization(t *testing.T) {
 	infra.LoadConfig()
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
-	service := authorization.NewService(clientServiceMock, token.NewTokenSigner())
-	tokenSigner := token.NewTokenSigner()
+	service := authorization.NewService(clientServiceMock, authorization.NewTokenSigner())
+	authorizationSigner := authorization.NewTokenSigner()
 
 	req := buildAuthorizationRequest()
 	ctx, _ := service.Authorize(req)
@@ -114,7 +113,7 @@ func TestSuccessfulAuthorization(t *testing.T) {
 	assert.Equal(t, req.RedirectURI, resp.RedirectURI)
 	assert.Equal(t, req.State, resp.State)
 
-	claims, _ := tokenSigner.VerifyAndDecode(resp.SignedAuthorizationCode)
+	claims, _ := authorizationSigner.VerifyAndDecode(resp.SignedAuthorizationCode)
 	assert.Equal(t, approveReq.AuthorizationCode, claims.AuthorizationCode)
 	assert.Equal(t, req.RedirectURI, claims.RedirectURI)
 	assert.Equal(t, test.TestClient.ID, claims.ClientID)
