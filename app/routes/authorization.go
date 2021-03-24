@@ -19,12 +19,14 @@ func AuthorizationRouter() chi.Router {
 	container.Make(&route)
 
 	router.Get("/oauth2/authorize", route.Authorize)
+	router.Post("/oauth2/authorize-callback", route.ProcessAuthorization)
 
 	return router
 }
 
 type AuthorizationRoutes interface {
 	Authorize(http.ResponseWriter, *http.Request)
+	ProcessAuthorization(http.ResponseWriter, *http.Request)
 }
 
 type routes struct {
@@ -51,6 +53,9 @@ func (a *routes) Authorize(w http.ResponseWriter, r *http.Request) {
 	redirectURI := buildRedirectURI(context)
 
 	http.Redirect(w, r, redirectURI, http.StatusFound)
+}
+
+func (a *routes) ProcessAuthorization(w http.ResponseWriter, r *http.Request) {
 }
 
 func parse(qs url.Values) authorization.AuthorizationRequest {

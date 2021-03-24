@@ -30,9 +30,9 @@ type AuthozirationContext struct {
 }
 
 type AuthorizationReponse struct {
-	RedirectURI       string
-	State             string
-	AuthorizationCode string
+	RedirectURI             string
+	State                   string
+	SignedAuthorizationCode string
 }
 
 type Service interface {
@@ -86,10 +86,12 @@ func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorization
 		return resp, AuthorizationDeniedError
 	}
 
+	signedAuthorizationCode := s.buildAuthorizationCodeToken(claims, approveAuthorization)
+
 	return AuthorizationReponse{
-		AuthorizationCode: approveAuthorization.AuthorizationCode,
-		State:             claims.State,
-		RedirectURI:       claims.RedirectURI,
+		SignedAuthorizationCode: signedAuthorizationCode,
+		State:                   claims.State,
+		RedirectURI:             claims.RedirectURI,
 	}, nil
 }
 
@@ -99,6 +101,18 @@ func (s *service) buildToken(req AuthorizationRequest) string {
 		State:       req.State,
 		Scope:       req.Scope,
 		RedirectURI: req.RedirectURI,
+	}
+
+	tokenString, _ := s.tokenSigner.SignAndEncode(claims)
+	return tokenString
+}
+
+func (s *service) buildAuthorizationCodeToken(ctx token.ContextClaims, approveAuthorization ApproveAuthorizationRequest) string {
+	claims := token.ContextClaims{
+		ClientID:          ctx.ClientID,
+		Scope:             ctx.Scope,
+		RedirectURI:       ctx.RedirectURI,
+		AuthorizationCode: approveAuthorization.AuthorizationCode,
 	}
 
 	tokenString, _ := s.tokenSigner.SignAndEncode(claims)

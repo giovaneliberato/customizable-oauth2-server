@@ -8,10 +8,11 @@ import (
 )
 
 type ContextClaims struct {
-	ClientID    string
-	State       string
-	Scope       []string
-	RedirectURI string
+	ClientID          string
+	State             string
+	Scope             []string
+	RedirectURI       string
+	AuthorizationCode string
 }
 type TokenSigner interface {
 	SignAndEncode(claims ContextClaims) (string, error)
@@ -52,7 +53,14 @@ func (t *tokenSigner) SignAndEncode(claims ContextClaims) (string, error) {
 		"client_id":    claims.ClientID,
 		"redirect_uri": claims.RedirectURI,
 		"scope":        claims.Scope,
-		"state":        claims.State,
+	}
+
+	if claims.State != "" {
+		mapClaims["state"] = claims.State
+	}
+
+	if claims.AuthorizationCode != "" {
+		mapClaims["authorization_code"] = claims.AuthorizationCode
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
@@ -70,13 +78,22 @@ func (t *tokenSigner) VerifyAndDecode(token string) (ContextClaims, error) {
 	}
 
 	claims := ContextClaims{
-		ClientID:    parsedClaims["client_id"].(string),
-		Scope:       toStringSlice(parsedClaims["scope"]),
-		State:       parsedClaims["state"].(string),
-		RedirectURI: parsedClaims["redirect_uri"].(string),
+		ClientID:          parsedClaims["client_id"].(string),
+		Scope:             toStringSlice(parsedClaims["scope"]),
+		State:             valueOrEmpty(parsedClaims, "state"),
+		AuthorizationCode: valueOrEmpty(parsedClaims, "authorization_code"),
+		RedirectURI:       parsedClaims["redirect_uri"].(string),
 	}
 
 	return claims, nil
+}
+
+func valueOrEmpty(claims jwt.MapClaims, key string) string {
+	if claims[key] == nil {
+		return ""
+	}
+
+	return claims[key].(string)
 }
 
 func toStringSlice(i interface{}) []string {

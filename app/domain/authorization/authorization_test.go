@@ -89,7 +89,7 @@ func TestDeniedAuthorization(t *testing.T) {
 	assert.Equal(t, "access_denied", err.Err)
 	assert.Equal(t, req.RedirectURI, resp.RedirectURI)
 	assert.Equal(t, req.State, resp.State)
-	assert.Empty(t, resp.AuthorizationCode)
+	assert.Empty(t, resp.SignedAuthorizationCode)
 }
 
 func TestSuccessfulAuthorization(t *testing.T) {
@@ -97,6 +97,7 @@ func TestSuccessfulAuthorization(t *testing.T) {
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
 	service := authorization.NewService(clientServiceMock, token.NewTokenSigner())
+	tokenSigner := token.NewTokenSigner()
 
 	req := buildAuthorizationRequest()
 	ctx, _ := service.Authorize(req)
@@ -111,7 +112,12 @@ func TestSuccessfulAuthorization(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, req.RedirectURI, resp.RedirectURI)
 	assert.Equal(t, req.State, resp.State)
-	assert.Equal(t, approveReq.AuthorizationCode, resp.AuthorizationCode)
+
+	claims, _ := tokenSigner.VerifyAndDecode(resp.SignedAuthorizationCode)
+	assert.Equal(t, approveReq.AuthorizationCode, claims.AuthorizationCode)
+	assert.Equal(t, req.RedirectURI, claims.RedirectURI)
+	assert.Equal(t, test.TestClient.ID, claims.ClientID)
+	assert.Equal(t, req.Scope, claims.Scope)
 }
 
 func buildAuthorizationRequest() authorization.AuthorizationRequest {
