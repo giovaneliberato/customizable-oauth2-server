@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type ContextClaims struct {
+type Context struct {
 	ClientID          string
 	State             string
 	ResponseType      string
@@ -15,9 +15,10 @@ type ContextClaims struct {
 	RedirectURI       string
 	AuthorizationCode string
 }
+
 type TokenSigner interface {
-	SignAndEncode(claims ContextClaims) (string, error)
-	VerifyAndDecode(token string) (ContextClaims, error)
+	SignAndEncode(Context Context) (string, error)
+	VerifyAndDecode(token string) (Context, error)
 }
 
 type tokenSigner struct {
@@ -44,59 +45,59 @@ func NewTokenSigner() TokenSigner {
 	}
 }
 
-func (t *tokenSigner) SignAndEncode(claims ContextClaims) (string, error) {
+func (t *tokenSigner) SignAndEncode(Context Context) (string, error) {
 	now := jwt.TimeFunc()
 
-	mapClaims := jwt.MapClaims{
+	mapContext := jwt.MapClaims{
 		"iss":           t.tokenIssuer,
 		"iat":           now.Unix(),
 		"exp":           now.Add(t.expirationSeconds).Unix(),
-		"client_id":     claims.ClientID,
-		"redirect_uri":  claims.RedirectURI,
-		"scope":         claims.Scope,
-		"response_type": claims.ResponseType,
+		"client_id":     Context.ClientID,
+		"redirect_uri":  Context.RedirectURI,
+		"scope":         Context.Scope,
+		"response_type": Context.ResponseType,
 	}
 
-	if claims.State != "" {
-		mapClaims["state"] = claims.State
+	if Context.State != "" {
+		mapContext["state"] = Context.State
 	}
 
-	if claims.AuthorizationCode != "" {
-		mapClaims["authorization_code"] = claims.AuthorizationCode
+	if Context.AuthorizationCode != "" {
+		mapContext["authorization_code"] = Context.AuthorizationCode
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, mapClaims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, mapContext)
 	return token.SignedString([]byte(t.signingKey))
 }
 
-func (t *tokenSigner) VerifyAndDecode(token string) (ContextClaims, error) {
-	var parsedClaims jwt.MapClaims
-	_, err := jwt.ParseWithClaims(token, &parsedClaims, func(token *jwt.Token) (interface{}, error) {
+func (t *tokenSigner) VerifyAndDecode(token string) (Context, error) {
+	var parsedContext jwt.MapClaims
+	_, err := jwt.ParseWithClaims(token, &parsedContext, func(token *jwt.Token) (interface{}, error) {
 		return []byte(t.signingKey), nil
 	})
 
 	if err != nil {
-		return ContextClaims{}, err
+		return Context{}, err
 	}
 
-	claims := ContextClaims{
-		ClientID:          parsedClaims["client_id"].(string),
-		Scope:             toStringSlice(parsedClaims["scope"]),
-		State:             valueOrEmpty(parsedClaims, "state"),
-		AuthorizationCode: valueOrEmpty(parsedClaims, "authorization_code"),
-		RedirectURI:       parsedClaims["redirect_uri"].(string),
-		ResponseType:      parsedClaims["response_type"].(string),
+	Context := Context{
+		ClientID:          parsedContext["client_id"].(string),
+		Scope:             toStringSlice(parsedContext["scope"]),
+		State:             valueOrEmpty(parsedContext, "state"),
+		AuthorizationCode: valueOrEmpty(parsedContext, "authorization_code"),
+		RedirectURI:       parsedContext["redirect_uri"].(string),
+		ResponseType:      parsedContext["response_type"].(string),
 	}
 
-	return claims, nil
+	return Context, nil
 }
 
-func valueOrEmpty(claims jwt.MapClaims, key string) string {
-	if claims[key] == nil {
+func valueOrEmpty(Context jwt.MapClaims, key string) string {
+	if Context[key] == nil {
 		return ""
 	}
 
-	return claims[key].(string)
+	return Context[key].(string)
 }
 
 func toStringSlice(i interface{}) []string {

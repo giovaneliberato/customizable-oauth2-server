@@ -14,7 +14,7 @@ func TestInvalidSignedAuthorizationCode(t *testing.T) {
 	tokenSigner := getTokenSigner()
 	service := buildTestService()
 
-	ctx := authorization.ContextClaims{
+	ctx := authorization.Context{
 		ClientID:          test.TestClient.ID,
 		Scope:             test.TestClient.AllowedScopes,
 		RedirectURI:       test.TestClient.AllowedRedirectUrls[0],
@@ -40,7 +40,7 @@ func TestInvalidContext(t *testing.T) {
 	tokenSigner := getTokenSigner()
 	service := buildTestService()
 
-	ctx := authorization.ContextClaims{
+	ctx := authorization.Context{
 		ClientID:          test.TestClient.ID,
 		ResponseType:      "code",
 		Scope:             test.TestClient.AllowedScopes,
@@ -67,7 +67,7 @@ func TestInvalidClient(t *testing.T) {
 	tokenSigner := getTokenSigner()
 	service := buildTestService()
 
-	ctx := authorization.ContextClaims{
+	ctx := authorization.Context{
 		ClientID:          test.TestClient.ID,
 		ResponseType:      "code",
 		Scope:             test.TestClient.AllowedScopes,
@@ -99,7 +99,7 @@ func TestInvalidExternalError(t *testing.T) {
 			ReturnError: true,
 		})
 
-	ctx := authorization.ContextClaims{
+	ctx := authorization.Context{
 		ClientID:          test.TestClient.ID,
 		ResponseType:      "code",
 		Scope:             test.TestClient.AllowedScopes,
@@ -126,7 +126,7 @@ func TestExchangeSuccess(t *testing.T) {
 	tokenSigner := getTokenSigner()
 	service := buildTestService()
 
-	ctx := authorization.ContextClaims{
+	ctx := authorization.Context{
 		ClientID:          test.TestClient.ID,
 		ResponseType:      "code",
 		Scope:             test.TestClient.AllowedScopes,

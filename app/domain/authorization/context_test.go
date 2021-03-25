@@ -15,18 +15,18 @@ const DURATION = time.Second * 60
 func TestSignAndEncode(t *testing.T) {
 	tokenSigner := authorization.NewTokenSignerWith(TEST_KEY, "app", DURATION)
 
-	claims := authorization.ContextClaims{
+	Context := authorization.Context{
 		ClientID:    "test-client",
 		State:       "xpto",
 		Scope:       []string{"profile", "messages"},
 		RedirectURI: "https://my.app/oauth2-callback",
 	}
 
-	token, err := tokenSigner.SignAndEncode(claims)
+	token, err := tokenSigner.SignAndEncode(Context)
 
 	assert.Nil(t, err)
-	var parsedClaims jwt.MapClaims
-	parsedToken, err := jwt.ParseWithClaims(token, &parsedClaims, func(token *jwt.Token) (interface{}, error) {
+	var parsedContext jwt.MapClaims
+	parsedToken, err := jwt.ParseWithClaims(token, &parsedContext, func(token *jwt.Token) (interface{}, error) {
 		return []byte(TEST_KEY), nil
 	})
 
@@ -51,7 +51,7 @@ func TestRejectInvalidSignature(t *testing.T) {
 func TestRejectExpiredTokens(t *testing.T) {
 	tokenSigner := authorization.NewTokenSignerWith(TEST_KEY, "app", 1)
 
-	token, err := tokenSigner.SignAndEncode(authorization.ContextClaims{})
+	token, err := tokenSigner.SignAndEncode(authorization.Context{})
 	assert.Nil(t, err)
 	time.Sleep(1)
 
@@ -62,20 +62,20 @@ func TestRejectExpiredTokens(t *testing.T) {
 func TestVerifySuccess(t *testing.T) {
 	tokenSigner := authorization.NewTokenSignerWith(TEST_KEY, "app", DURATION)
 
-	claims := authorization.ContextClaims{
+	Context := authorization.Context{
 		ClientID:    "test-client",
 		State:       "xpto",
 		Scope:       []string{"profile", "messages"},
 		RedirectURI: "https://my.app/oauth2-callback",
 	}
 
-	token, err := tokenSigner.SignAndEncode(claims)
+	token, err := tokenSigner.SignAndEncode(Context)
 
-	verifiedClaims, err := tokenSigner.VerifyAndDecode(token)
+	verifiedContext, err := tokenSigner.VerifyAndDecode(token)
 	assert.Nil(t, err)
 
-	assert.Equal(t, "test-client", verifiedClaims.ClientID)
-	assert.Equal(t, "xpto", verifiedClaims.State)
-	assert.Equal(t, []string{"profile", "messages"}, verifiedClaims.Scope)
-	assert.Equal(t, "https://my.app/oauth2-callback", verifiedClaims.RedirectURI)
+	assert.Equal(t, "test-client", verifiedContext.ClientID)
+	assert.Equal(t, "xpto", verifiedContext.State)
+	assert.Equal(t, []string{"profile", "messages"}, verifiedContext.Scope)
+	assert.Equal(t, "https://my.app/oauth2-callback", verifiedContext.RedirectURI)
 }

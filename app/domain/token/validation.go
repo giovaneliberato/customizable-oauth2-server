@@ -7,7 +7,7 @@ import (
 	"goauth-extension/app/domain/client"
 )
 
-func ValidateContext(req AuthorizationCodeRequest, ctx authorization.ContextClaims) *domain.OAuthError {
+func ValidateContext(req AuthorizationCodeRequest, ctx authorization.Context) *domain.OAuthError {
 	if req.ClientID != ctx.ClientID {
 		return domain.InvalidClientError
 	}

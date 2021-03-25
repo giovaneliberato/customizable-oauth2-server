@@ -1,0 +1,12 @@
+
+
+jwt:
+  signing-key: "please do us a favor and change this to a SHA256 real key"
+  issuer: "test-app"
+  expiration-seconds: 120
+
+authorization:
+  consent-url: https://my-app.com/oauth2/authorize
+
+oauth2-server:
+  supported-grant-types: ["code"]

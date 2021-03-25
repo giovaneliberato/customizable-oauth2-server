@@ -11,7 +11,7 @@ import (
 )
 
 func TestResponseTypeNotMatch(t *testing.T) {
-	ctx := authorization.ContextClaims{
+	ctx := authorization.Context{
 		AuthorizationCode: "xpto",
 		ClientID:          test.TestClient.ID,
 		ResponseType:      "code",

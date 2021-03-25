@@ -195,12 +195,12 @@ func httpClient() *http.Client {
 
 func generateValidSignedContext() string {
 	signer := authorization.NewTokenSigner()
-	claims := authorization.ContextClaims{
+	Context := authorization.Context{
 		ClientID:    test.TestClient.ID,
 		State:       "state",
 		Scope:       []string{"profile"},
 		RedirectURI: test.TestClient.AllowedRedirectUrls[0],
 	}
-	signedContext, _ := signer.SignAndEncode(claims)
+	signedContext, _ := signer.SignAndEncode(Context)
 	return signedContext
 }

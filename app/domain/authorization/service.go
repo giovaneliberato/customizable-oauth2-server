@@ -46,7 +46,7 @@ func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext,
 }
 
 func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorizationRequest) (AuthorizationReponse, *domain.OAuthError) {
-	claims, err := s.tokenSigner.VerifyAndDecode(approveAuthorization.SignedAuthorizationRequest)
+	Context, err := s.tokenSigner.VerifyAndDecode(approveAuthorization.SignedAuthorizationRequest)
 
 	if err != nil {
 		return AuthorizationReponse{}, domain.InvalidApproveAuthorizationError
@@ -54,19 +54,19 @@ func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorization
 
 	if !approveAuthorization.ApprovedByUser {
 		resp := AuthorizationReponse{
-			RedirectURI: claims.RedirectURI,
-			State:       claims.State,
+			RedirectURI: Context.RedirectURI,
+			State:       Context.State,
 		}
 
 		return resp, domain.AccessDeniedError
 	}
 
-	signedAuthorizationCode := s.buildAuthorizationCodeToken(claims, approveAuthorization)
+	signedAuthorizationCode := s.buildAuthorizationCodeToken(Context, approveAuthorization)
 
 	return AuthorizationReponse{
 		SignedAuthorizationCode: signedAuthorizationCode,
-		State:                   claims.State,
-		RedirectURI:             claims.RedirectURI,
+		State:                   Context.State,
+		RedirectURI:             Context.RedirectURI,
 	}, nil
 }
 
@@ -75,25 +75,25 @@ func (s *service) ExchangeAuthorizationCode(r ExchangeAuthorizationCodeRequest) 
 }
 
 func (s *service) buildAuthorizationContext(req AuthorizationRequest) string {
-	claims := ContextClaims{
+	Context := Context{
 		ClientID:    req.ClientID,
 		State:       req.State,
 		Scope:       req.Scope,
 		RedirectURI: req.RedirectURI,
 	}
 
-	tokenString, _ := s.tokenSigner.SignAndEncode(claims)
+	tokenString, _ := s.tokenSigner.SignAndEncode(Context)
 	return tokenString
 }
 
-func (s *service) buildAuthorizationCodeToken(ctx ContextClaims, approveAuthorization ApproveAuthorizationRequest) string {
-	claims := ContextClaims{
+func (s *service) buildAuthorizationCodeToken(ctx Context, approveAuthorization ApproveAuthorizationRequest) string {
+	Context := Context{
 		ClientID:          ctx.ClientID,
 		Scope:             ctx.Scope,
 		RedirectURI:       ctx.RedirectURI,
 		AuthorizationCode: approveAuthorization.AuthorizationCode,
 	}
 
-	tokenString, _ := s.tokenSigner.SignAndEncode(claims)
+	tokenString, _ := s.tokenSigner.SignAndEncode(Context)
 	return tokenString
 }

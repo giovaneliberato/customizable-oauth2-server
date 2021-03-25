@@ -113,11 +113,11 @@ func TestSuccessfulAuthorization(t *testing.T) {
 	assert.Equal(t, req.RedirectURI, resp.RedirectURI)
 	assert.Equal(t, req.State, resp.State)
 
-	claims, _ := authorizationSigner.VerifyAndDecode(resp.SignedAuthorizationCode)
-	assert.Equal(t, approveReq.AuthorizationCode, claims.AuthorizationCode)
-	assert.Equal(t, req.RedirectURI, claims.RedirectURI)
-	assert.Equal(t, test.TestClient.ID, claims.ClientID)
-	assert.Equal(t, req.Scope, claims.Scope)
+	Context, _ := authorizationSigner.VerifyAndDecode(resp.SignedAuthorizationCode)
+	assert.Equal(t, approveReq.AuthorizationCode, Context.AuthorizationCode)
+	assert.Equal(t, req.RedirectURI, Context.RedirectURI)
+	assert.Equal(t, test.TestClient.ID, Context.ClientID)
+	assert.Equal(t, req.Scope, Context.Scope)
 }
 
 func buildAuthorizationRequest() authorization.AuthorizationRequest {
