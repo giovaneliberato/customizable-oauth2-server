@@ -52,7 +52,7 @@ func HashSecret(rawSecret string) []byte {
 }
 
 func validate(c Client) error {
-	if !supportedGrantType(c.AllowedGrantTypes) {
+	if !supportedResponseType(c.AllowedResponseTypes) {
 		return errors.New("Grant type not supported")
 	}
 
@@ -70,7 +70,7 @@ func validate(c Client) error {
 	return nil
 }
 
-func supportedGrantType(grants []string) bool {
+func supportedResponseType(grants []string) bool {
 	for _, supportedGrant := range viper.GetStringSlice("oauth2-server.supported-grant-types") {
 		for _, grant := range grants {
 			if supportedGrant == grant {

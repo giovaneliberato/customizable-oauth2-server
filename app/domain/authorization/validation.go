@@ -14,7 +14,7 @@ func Validate(client client.Client, data AuthorizationRequest) *domain.OAuthErro
 		return domain.InvalidClientError
 	}
 
-	if notIn(data.GrantType, client.AllowedGrantTypes) {
+	if notIn(data.ResponseType, client.AllowedResponseTypes) {
 		return domain.UnsupportedResponseTypeError
 	}
 

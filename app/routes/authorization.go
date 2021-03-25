@@ -83,11 +83,11 @@ func proccessError(w http.ResponseWriter, r *http.Request, errorRedirectURL, sta
 
 func parse(qs url.Values) authorization.AuthorizationRequest {
 	return authorization.AuthorizationRequest{
-		ClientID:    qs.Get("client_id"),
-		GrantType:   qs.Get("response_type"),
-		RedirectURI: qs.Get("redirect_uri"),
-		Scope:       strings.Split(qs.Get("scope"), " "),
-		State:       qs.Get("state"),
+		ClientID:     qs.Get("client_id"),
+		ResponseType: qs.Get("response_type"),
+		RedirectURI:  qs.Get("redirect_uri"),
+		Scope:        strings.Split(qs.Get("scope"), " "),
+		State:        qs.Get("state"),
 	}
 }
 

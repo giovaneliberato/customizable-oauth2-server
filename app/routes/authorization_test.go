@@ -2,8 +2,8 @@ package routes_test
 
 import (
 	"encoding/json"
+	"goauth-extension/app/domain"
 	"goauth-extension/app/domain/authorization"
-	"goauth-extension/app/domain/token"
 	"goauth-extension/app/routes"
 	"goauth-extension/app/test"
 	"net/http"
@@ -20,7 +20,7 @@ func TestInvalidClientID(t *testing.T) {
 	req.URL.RawQuery = buildQueryStringWith("client_id", "invalid").Encode()
 
 	resp, _ := httpClient().Do(req)
-	var respBody authorization.ValidationError
+	var respBody domain.OAuthError
 
 	json.NewDecoder(resp.Body).Decode(&respBody)
 
@@ -35,7 +35,7 @@ func TestInvalidRedirectURL(t *testing.T) {
 	req.URL.RawQuery = buildQueryStringWith("redirect_uri", "not even a url").Encode()
 
 	resp, _ := httpClient().Do(req)
-	var respBody authorization.ValidationError
+	var respBody domain.OAuthError
 
 	json.NewDecoder(resp.Body).Decode(&respBody)
 
@@ -123,7 +123,7 @@ func TestUnsuccessfulAuthorization(t *testing.T) {
 	req.PostForm.Add("signed_context", generateValidSignedContext()+"tampered")
 
 	resp, _ := httpClient().Do(req)
-	var respBody authorization.ValidationError
+	var respBody domain.OAuthError
 
 	json.NewDecoder(resp.Body).Decode(&respBody)
 
@@ -194,8 +194,8 @@ func httpClient() *http.Client {
 }
 
 func generateValidSignedContext() string {
-	signer := token.NewTokenSigner()
-	claims := token.ContextClaims{
+	signer := authorization.NewTokenSigner()
+	claims := authorization.ContextClaims{
 		ClientID:    test.TestClient.ID,
 		State:       "state",
 		Scope:       []string{"profile"},

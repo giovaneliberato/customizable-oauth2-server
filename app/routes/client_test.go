@@ -3,7 +3,7 @@ package routes_test
 import (
 	"bytes"
 	"encoding/json"
-	"goauth-extension/app/domain/authorization"
+	"goauth-extension/app/domain"
 	"goauth-extension/app/routes"
 	"goauth-extension/app/test"
 	"net/http"
@@ -27,7 +27,7 @@ func TestCreateClientSuccess(t *testing.T) {
 	req, _ := http.NewRequest("POST", server.URL+"/oauth2/client", bytes.NewBuffer(jsonValue))
 
 	resp, _ := httpClient().Do(req)
-	var respBody authorization.ValidationError
+	var respBody domain.OAuthError
 
 	json.NewDecoder(resp.Body).Decode(&respBody)
 

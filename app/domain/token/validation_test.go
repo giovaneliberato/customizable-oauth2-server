@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGrantTypeNotMatch(t *testing.T) {
+func TestResponseTypeNotMatch(t *testing.T) {
 	ctx := authorization.ContextClaims{
 		AuthorizationCode: "xpto",
 		ClientID:          test.TestClient.ID,
@@ -22,7 +22,7 @@ func TestGrantTypeNotMatch(t *testing.T) {
 	req := token.AuthorizationCodeRequest{
 		ClientID:                test.TestClient.ID,
 		ClientSecret:            test.TestClient.RawSecret,
-		GrantType:               "implicit",
+		ResponseType:            "implicit",
 		SignedAuthorizationCode: signed,
 	}
 
@@ -35,7 +35,7 @@ func TestClientIDDoNotMatch(t *testing.T) {
 	req := token.AuthorizationCodeRequest{
 		ClientID:     "not-the-same-id",
 		ClientSecret: test.TestClient.RawSecret,
-		GrantType:    "code",
+		ResponseType: "code",
 	}
 
 	err := token.ValidateClient(req, test.TestClient)
@@ -47,7 +47,7 @@ func TestClientSecretDoNotMatch(t *testing.T) {
 	req := token.AuthorizationCodeRequest{
 		ClientID:     test.TestClient.ID,
 		ClientSecret: "not-the-same-secret",
-		GrantType:    "code",
+		ResponseType: "code",
 	}
 
 	err := token.ValidateClient(req, test.TestClient)
@@ -59,7 +59,7 @@ func TestClientValidationSuccess(t *testing.T) {
 	req := token.AuthorizationCodeRequest{
 		ClientID:     test.TestClient.ID,
 		ClientSecret: test.TestClient.RawSecret,
-		GrantType:    "code",
+		ResponseType: "code",
 	}
 
 	err := token.ValidateClient(req, test.TestClient)

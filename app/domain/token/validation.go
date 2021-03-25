@@ -12,7 +12,7 @@ func ValidateContext(req AuthorizationCodeRequest, ctx authorization.ContextClai
 		return domain.InvalidClientError
 	}
 
-	if req.GrantType != ctx.ResponseType {
+	if req.ResponseType != ctx.ResponseType {
 		return domain.UnsupportedResponseTypeError
 	}
 

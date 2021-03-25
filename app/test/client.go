@@ -24,10 +24,10 @@ func (m *ClientServiceMock) ValidateSecret(c client.Client, secret string) error
 }
 
 var TestClient = client.Client{
-	ID:                  "test-id",
-	RawSecret:           "secret",
-	HashedSecret:        client.HashSecret("secret"),
-	AllowedRedirectUrls: []string{"https://test.client/oauth2-callback"},
-	AllowedGrantTypes:   []string{"code"},
-	AllowedScopes:       []string{"profile", "contacts", "messages"},
+	ID:                   "test-id",
+	RawSecret:            "secret",
+	HashedSecret:         client.HashSecret("secret"),
+	AllowedRedirectUrls:  []string{"https://test.client/oauth2-callback"},
+	AllowedResponseTypes: []string{"code"},
+	AllowedScopes:        []string{"profile", "contacts", "messages"},
 }

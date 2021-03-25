@@ -3,7 +3,7 @@ package token
 type AuthorizationCodeRequest struct {
 	ClientID                string
 	ClientSecret            string
-	GrantType               string
+	ResponseType            string
 	SignedAuthorizationCode string
 }
 

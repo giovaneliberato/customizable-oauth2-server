@@ -1,11 +1,11 @@
 package authorization
 
 type AuthorizationRequest struct {
-	ClientID    string
-	GrantType   string
-	RedirectURI string
-	Scope       []string
-	State       string
+	ClientID     string
+	ResponseType string
+	RedirectURI  string
+	Scope        []string
+	State        string
 }
 
 type ApproveAuthorizationRequest struct {
@@ -30,6 +30,6 @@ type AuthorizationReponse struct {
 type ExchangeAuthorizationCodeRequest struct {
 	ClientID                string
 	ClientSecret            string
-	GrantType               string
+	ResponseType            string
 	SignedAuthorizationCode string
 }
