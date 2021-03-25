@@ -13,19 +13,19 @@ type Service interface {
 type service struct {
 	clientService         client.Service
 	externalServiceClient ExternalServiceClient
-	tokenSigner           authorization.TokenSigner
+	contextSigner         authorization.ContextSigner
 }
 
-func NewService(clientService client.Service, tokenSigner authorization.TokenSigner, externalServiceClient ExternalServiceClient) Service {
+func NewService(clientService client.Service, contextSigner authorization.ContextSigner, externalServiceClient ExternalServiceClient) Service {
 	return &service{
 		clientService:         clientService,
-		tokenSigner:           tokenSigner,
+		contextSigner:         contextSigner,
 		externalServiceClient: externalServiceClient,
 	}
 }
 
 func (s *service) Exchange(req AuthorizationCodeRequest) (AccessTokenResponse, *domain.OAuthError) {
-	ctx, err := s.tokenSigner.VerifyAndDecode(req.SignedAuthorizationCode)
+	ctx, err := s.contextSigner.VerifyAndDecode(req.SignedAuthorizationCode)
 
 	if err != nil {
 		return AccessTokenResponse{}, domain.InvalidAuthorizationCodeRequestError

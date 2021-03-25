@@ -11,7 +11,7 @@ import (
 )
 
 func TestInvalidSignedAuthorizationCode(t *testing.T) {
-	tokenSigner := getTokenSigner()
+	contextSigner := getContextSigner()
 	service := buildTestService()
 
 	ctx := authorization.Context{
@@ -21,7 +21,7 @@ func TestInvalidSignedAuthorizationCode(t *testing.T) {
 		AuthorizationCode: "some-authorization-code",
 	}
 
-	signedAuthCode, _ := tokenSigner.SignAndEncode(ctx)
+	signedAuthCode, _ := contextSigner.SignAndEncode(ctx)
 
 	req := token.AuthorizationCodeRequest{
 		ClientID:                test.TestClient.ID,
@@ -37,7 +37,7 @@ func TestInvalidSignedAuthorizationCode(t *testing.T) {
 }
 
 func TestInvalidContext(t *testing.T) {
-	tokenSigner := getTokenSigner()
+	contextSigner := getContextSigner()
 	service := buildTestService()
 
 	ctx := authorization.Context{
@@ -48,7 +48,7 @@ func TestInvalidContext(t *testing.T) {
 		AuthorizationCode: "some-authorization-code",
 	}
 
-	signedAuthCode, _ := tokenSigner.SignAndEncode(ctx)
+	signedAuthCode, _ := contextSigner.SignAndEncode(ctx)
 
 	req := token.AuthorizationCodeRequest{
 		ClientID:                test.TestClient.ID,
@@ -64,7 +64,7 @@ func TestInvalidContext(t *testing.T) {
 }
 
 func TestInvalidClient(t *testing.T) {
-	tokenSigner := getTokenSigner()
+	contextSigner := getContextSigner()
 	service := buildTestService()
 
 	ctx := authorization.Context{
@@ -75,7 +75,7 @@ func TestInvalidClient(t *testing.T) {
 		AuthorizationCode: "some-authorization-code",
 	}
 
-	signedAuthCode, _ := tokenSigner.SignAndEncode(ctx)
+	signedAuthCode, _ := contextSigner.SignAndEncode(ctx)
 
 	req := token.AuthorizationCodeRequest{
 		ClientID:                "another-client-id",
@@ -91,10 +91,10 @@ func TestInvalidClient(t *testing.T) {
 }
 
 func TestInvalidExternalError(t *testing.T) {
-	tokenSigner := getTokenSigner()
+	contextSigner := getContextSigner()
 	service := token.NewService(
 		&test.ClientServiceMock{},
-		getTokenSigner(),
+		getContextSigner(),
 		&test.ExternalServiceClientMock{
 			ReturnError: true,
 		})
@@ -107,7 +107,7 @@ func TestInvalidExternalError(t *testing.T) {
 		AuthorizationCode: "some-authorization-code",
 	}
 
-	signedAuthCode, _ := tokenSigner.SignAndEncode(ctx)
+	signedAuthCode, _ := contextSigner.SignAndEncode(ctx)
 
 	req := token.AuthorizationCodeRequest{
 		ClientID:                test.TestClient.ID,
@@ -123,7 +123,7 @@ func TestInvalidExternalError(t *testing.T) {
 }
 
 func TestExchangeSuccess(t *testing.T) {
-	tokenSigner := getTokenSigner()
+	contextSigner := getContextSigner()
 	service := buildTestService()
 
 	ctx := authorization.Context{
@@ -134,7 +134,7 @@ func TestExchangeSuccess(t *testing.T) {
 		AuthorizationCode: "some-authorization-code",
 	}
 
-	signedAuthCode, _ := tokenSigner.SignAndEncode(ctx)
+	signedAuthCode, _ := contextSigner.SignAndEncode(ctx)
 
 	req := token.AuthorizationCodeRequest{
 		ClientID:                test.TestClient.ID,
@@ -151,12 +151,12 @@ func TestExchangeSuccess(t *testing.T) {
 	assert.Equal(t, ctx.Scope, accessToken.Scope)
 }
 
-func getTokenSigner() authorization.TokenSigner {
+func getContextSigner() authorization.ContextSigner {
 	test.ConfigureTestScenario()
 
-	var tokenSigner authorization.TokenSigner
-	container.Make(&tokenSigner)
-	return tokenSigner
+	var contextSigner authorization.ContextSigner
+	container.Make(&contextSigner)
+	return contextSigner
 }
 
 func buildTestService() token.Service {
@@ -164,6 +164,6 @@ func buildTestService() token.Service {
 		&test.ClientServiceMock{
 			Return: test.TestClient,
 		},
-		getTokenSigner(),
+		getContextSigner(),
 		&test.ExternalServiceClientMock{})
 }

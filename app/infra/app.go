@@ -9,13 +9,11 @@ import (
 )
 
 var componentProviders = []interface{}{
-	// domain
-	authorization.NewTokenSigner,
+	authorization.NewContextSigner(),
 	client.NewRepository,
 	client.NewService,
 	authorization.NewService,
 
-	//routes
 	routes.NewAuthorizationRoutes,
 	routes.NewClientRoutes,
 }

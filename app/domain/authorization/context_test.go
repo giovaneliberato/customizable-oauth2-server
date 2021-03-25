@@ -13,7 +13,7 @@ const TEST_KEY = "86088fd3028e486cc7adea8a1450a41e36529a23"
 const DURATION = time.Second * 60
 
 func TestSignAndEncode(t *testing.T) {
-	tokenSigner := authorization.NewTokenSignerWith(TEST_KEY, "app", DURATION)
+	contextSigner := authorization.NewContextSignerWith(TEST_KEY, "app", DURATION)
 
 	Context := authorization.Context{
 		ClientID:    "test-client",
@@ -22,45 +22,45 @@ func TestSignAndEncode(t *testing.T) {
 		RedirectURI: "https://my.app/oauth2-callback",
 	}
 
-	token, err := tokenSigner.SignAndEncode(Context)
+	signedContext, err := contextSigner.SignAndEncode(Context)
 
 	assert.Nil(t, err)
 	var parsedContext jwt.MapClaims
-	parsedToken, err := jwt.ParseWithClaims(token, &parsedContext, func(token *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.ParseWithClaims(signedContext, &parsedContext, func(token *jwt.Token) (interface{}, error) {
 		return []byte(TEST_KEY), nil
 	})
 
 	assert.True(t, parsedToken.Valid)
 }
 
-func TestRejectInvalidToken(t *testing.T) {
-	tokenSigner := authorization.NewTokenSignerWith(TEST_KEY, "app", 1)
+func TestRejectInvalidContext(t *testing.T) {
+	contextSigner := authorization.NewContextSignerWith(TEST_KEY, "app", 1)
 
-	_, err := tokenSigner.VerifyAndDecode("not even a token")
+	_, err := contextSigner.VerifyAndDecode("not even a context")
 	assert.NotNil(t, err)
 }
 
 func TestRejectInvalidSignature(t *testing.T) {
-	tokenSigner := authorization.NewTokenSignerWith(TEST_KEY, "app", 1)
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRfaWQiOiJ0ZXN0LWNsaWVudCIsImV4cCI6MTYxNjUzMTkzOSwiaWF0IjoxNjE2NTMxODc5LCJpc3MiOiJhcHAiLCJyZWRpcmVjdF91cmkiOiJodHRwczovL215LmFwcC9vYXV0aDItY2FsbGJhY2siLCJzY29wZXMiOiJwcm9maWxlIG1lc3NhZ2VzIiwic3RhdGUiOiJ4cHRvIn0.4i4ex4Hj63bot0DHg7AZwAaACJhPImessed"
+	contextSigner := authorization.NewContextSignerWith(TEST_KEY, "app", 1)
+	context := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRfaWQiOiJ0ZXN0LWNsaWVudCIsImV4cCI6MTYxNjUzMTkzOSwiaWF0IjoxNjE2NTMxODc5LCJpc3MiOiJhcHAiLCJyZWRpcmVjdF91cmkiOiJodHRwczovL215LmFwcC9vYXV0aDItY2FsbGJhY2siLCJzY29wZXMiOiJwcm9maWxlIG1lc3NhZ2VzIiwic3RhdGUiOiJ4cHRvIn0.4i4ex4Hj63bot0DHg7AZwAaACJhPImessed"
 
-	_, err := tokenSigner.VerifyAndDecode(token)
+	_, err := contextSigner.VerifyAndDecode(context)
 	assert.NotNil(t, err)
 }
 
 func TestRejectExpiredTokens(t *testing.T) {
-	tokenSigner := authorization.NewTokenSignerWith(TEST_KEY, "app", 1)
+	contextSigner := authorization.NewContextSignerWith(TEST_KEY, "app", 1)
 
-	token, err := tokenSigner.SignAndEncode(authorization.Context{})
+	context, err := contextSigner.SignAndEncode(authorization.Context{})
 	assert.Nil(t, err)
 	time.Sleep(1)
 
-	_, err = tokenSigner.VerifyAndDecode(token)
+	_, err = contextSigner.VerifyAndDecode(context)
 	assert.NotNil(t, err)
 }
 
 func TestVerifySuccess(t *testing.T) {
-	tokenSigner := authorization.NewTokenSignerWith(TEST_KEY, "app", DURATION)
+	contextSigner := authorization.NewContextSignerWith(TEST_KEY, "app", DURATION)
 
 	Context := authorization.Context{
 		ClientID:    "test-client",
@@ -69,9 +69,9 @@ func TestVerifySuccess(t *testing.T) {
 		RedirectURI: "https://my.app/oauth2-callback",
 	}
 
-	token, err := tokenSigner.SignAndEncode(Context)
+	context, err := contextSigner.SignAndEncode(Context)
 
-	verifiedContext, err := tokenSigner.VerifyAndDecode(token)
+	verifiedContext, err := contextSigner.VerifyAndDecode(context)
 	assert.Nil(t, err)
 
 	assert.Equal(t, "test-client", verifiedContext.ClientID)

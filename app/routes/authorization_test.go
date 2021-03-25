@@ -194,7 +194,7 @@ func httpClient() *http.Client {
 }
 
 func generateValidSignedContext() string {
-	signer := authorization.NewTokenSigner()
+	signer := authorization.NewContextSigner()
 	Context := authorization.Context{
 		ClientID:    test.TestClient.ID,
 		State:       "state",

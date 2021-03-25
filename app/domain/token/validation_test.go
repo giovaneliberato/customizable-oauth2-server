@@ -17,7 +17,7 @@ func TestResponseTypeNotMatch(t *testing.T) {
 		ResponseType:      "code",
 	}
 
-	signed, _ := authorization.NewTokenSigner().SignAndEncode(ctx)
+	signed, _ := authorization.NewContextSigner().SignAndEncode(ctx)
 
 	req := token.AuthorizationCodeRequest{
 		ClientID:                test.TestClient.ID,

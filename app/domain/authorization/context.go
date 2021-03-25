@@ -16,40 +16,40 @@ type Context struct {
 	AuthorizationCode string
 }
 
-type TokenSigner interface {
+type ContextSigner interface {
 	SignAndEncode(Context Context) (string, error)
-	VerifyAndDecode(token string) (Context, error)
+	VerifyAndDecode(context string) (Context, error)
 }
 
-type tokenSigner struct {
+type contextSigner struct {
 	signingKey        string
-	tokenIssuer       string
+	contextIssuer     string
 	expirationSeconds time.Duration
 	timeProvider      func() time.Time
 }
 
-func NewTokenSignerWith(key string, issuer string, exp time.Duration) TokenSigner {
-	return &tokenSigner{
+func NewContextSignerWith(key string, issuer string, exp time.Duration) ContextSigner {
+	return &contextSigner{
 		signingKey:        key,
-		tokenIssuer:       issuer,
+		contextIssuer:     issuer,
 		expirationSeconds: exp,
 	}
 }
 
-func NewTokenSigner() TokenSigner {
+func NewContextSigner() ContextSigner {
 	exp := time.Second * time.Duration(viper.GetInt("jwt.expiration-seconds"))
-	return &tokenSigner{
+	return &contextSigner{
 		signingKey:        viper.GetString("jwt.signing-key"),
-		tokenIssuer:       viper.GetString("jwt.issuer"),
+		contextIssuer:     viper.GetString("jwt.issuer"),
 		expirationSeconds: exp,
 	}
 }
 
-func (t *tokenSigner) SignAndEncode(Context Context) (string, error) {
+func (t *contextSigner) SignAndEncode(Context Context) (string, error) {
 	now := jwt.TimeFunc()
 
 	mapContext := jwt.MapClaims{
-		"iss":           t.tokenIssuer,
+		"iss":           t.contextIssuer,
 		"iat":           now.Unix(),
 		"exp":           now.Add(t.expirationSeconds).Unix(),
 		"client_id":     Context.ClientID,
@@ -66,13 +66,13 @@ func (t *tokenSigner) SignAndEncode(Context Context) (string, error) {
 		mapContext["authorization_code"] = Context.AuthorizationCode
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, mapContext)
-	return token.SignedString([]byte(t.signingKey))
+	context := jwt.NewWithClaims(jwt.SigningMethodHS256, mapContext)
+	return context.SignedString([]byte(t.signingKey))
 }
 
-func (t *tokenSigner) VerifyAndDecode(token string) (Context, error) {
+func (t *contextSigner) VerifyAndDecode(context string) (Context, error) {
 	var parsedContext jwt.MapClaims
-	_, err := jwt.ParseWithClaims(token, &parsedContext, func(token *jwt.Token) (interface{}, error) {
+	_, err := jwt.ParseWithClaims(context, &parsedContext, func(context *jwt.Token) (interface{}, error) {
 		return []byte(t.signingKey), nil
 	})
 

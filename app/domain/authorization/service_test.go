@@ -16,7 +16,7 @@ func TestNotBuildConsentContextIfValidationFails(t *testing.T) {
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = client.Client{}
 
-	service := authorization.NewService(clientServiceMock, authorization.NewTokenSigner())
+	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
 
 	ctx, err := service.Authorize(authorization.AuthorizationRequest{})
 
@@ -29,7 +29,7 @@ func TestBuildAuthorizationContext(t *testing.T) {
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
 
-	service := authorization.NewService(clientServiceMock, authorization.NewTokenSigner())
+	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
 
 	req := authorization.AuthorizationRequest{
 		ClientID:     test.TestClient.ID,
@@ -52,7 +52,7 @@ func TestRejectApproveAuthorizationIfSignatureIsInvalid(t *testing.T) {
 	infra.LoadConfig()
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
-	service := authorization.NewService(clientServiceMock, authorization.NewTokenSigner())
+	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
 
 	ctx, _ := service.Authorize(buildAuthorizationRequest())
 
@@ -72,7 +72,7 @@ func TestDeniedAuthorization(t *testing.T) {
 	infra.LoadConfig()
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
-	service := authorization.NewService(clientServiceMock, authorization.NewTokenSigner())
+	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
 
 	req := buildAuthorizationRequest()
 	ctx, _ := service.Authorize(req)
@@ -96,8 +96,8 @@ func TestSuccessfulAuthorization(t *testing.T) {
 	infra.LoadConfig()
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
-	service := authorization.NewService(clientServiceMock, authorization.NewTokenSigner())
-	authorizationSigner := authorization.NewTokenSigner()
+	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
+	authorizationSigner := authorization.NewContextSigner()
 
 	req := buildAuthorizationRequest()
 	ctx, _ := service.Authorize(req)

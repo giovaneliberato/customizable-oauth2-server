@@ -15,14 +15,14 @@ type Service interface {
 
 type service struct {
 	client           client.Service
-	tokenSigner      TokenSigner
+	contextSigner    ContextSigner
 	authorizationURL string
 }
 
-func NewService(client client.Service, signer TokenSigner) Service {
+func NewService(client client.Service, signer ContextSigner) Service {
 	return &service{
 		client:           client,
-		tokenSigner:      signer,
+		contextSigner:    signer,
 		authorizationURL: viper.GetString("authorization.consent-url"),
 	}
 }
@@ -46,7 +46,7 @@ func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext,
 }
 
 func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorizationRequest) (AuthorizationReponse, *domain.OAuthError) {
-	Context, err := s.tokenSigner.VerifyAndDecode(approveAuthorization.SignedAuthorizationRequest)
+	Context, err := s.contextSigner.VerifyAndDecode(approveAuthorization.SignedAuthorizationRequest)
 
 	if err != nil {
 		return AuthorizationReponse{}, domain.InvalidApproveAuthorizationError
@@ -61,7 +61,7 @@ func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorization
 		return resp, domain.AccessDeniedError
 	}
 
-	signedAuthorizationCode := s.buildAuthorizationCodeToken(Context, approveAuthorization)
+	signedAuthorizationCode := s.buildAuthorizationCodeContext(Context, approveAuthorization)
 
 	return AuthorizationReponse{
 		SignedAuthorizationCode: signedAuthorizationCode,
@@ -82,11 +82,11 @@ func (s *service) buildAuthorizationContext(req AuthorizationRequest) string {
 		RedirectURI: req.RedirectURI,
 	}
 
-	tokenString, _ := s.tokenSigner.SignAndEncode(Context)
-	return tokenString
+	signedContext, _ := s.contextSigner.SignAndEncode(Context)
+	return signedContext
 }
 
-func (s *service) buildAuthorizationCodeToken(ctx Context, approveAuthorization ApproveAuthorizationRequest) string {
+func (s *service) buildAuthorizationCodeContext(ctx Context, approveAuthorization ApproveAuthorizationRequest) string {
 	Context := Context{
 		ClientID:          ctx.ClientID,
 		Scope:             ctx.Scope,
@@ -94,6 +94,6 @@ func (s *service) buildAuthorizationCodeToken(ctx Context, approveAuthorization 
 		AuthorizationCode: approveAuthorization.AuthorizationCode,
 	}
 
-	tokenString, _ := s.tokenSigner.SignAndEncode(Context)
-	return tokenString
+	signedContext, _ := s.contextSigner.SignAndEncode(Context)
+	return signedContext
 }
