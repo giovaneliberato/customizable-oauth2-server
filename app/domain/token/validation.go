@@ -1,0 +1,27 @@
+package token
+
+import (
+	"bytes"
+	"goauth-extension/app/domain"
+	"goauth-extension/app/domain/authorization"
+	"goauth-extension/app/domain/client"
+)
+
+func ValidateContext(req AuthorizationCodeRequest, ctx authorization.ContextClaims) *domain.OAuthError {
+	if req.ClientID != ctx.ClientID {
+		return domain.InvalidClientError
+	}
+
+	if req.GrantType != ctx.ResponseType {
+		return domain.UnsupportedResponseTypeError
+	}
+
+	return nil
+}
+
+func ValidateClient(req AuthorizationCodeRequest, c client.Client) *domain.OAuthError {
+	if bytes.Compare([]byte(c.HashedSecret), client.HashSecret(req.ClientSecret)) != 0 {
+		return domain.InvalidClientError
+	}
+	return nil
+}

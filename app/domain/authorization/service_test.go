@@ -45,7 +45,7 @@ func TestBuildAuthorizationContext(t *testing.T) {
 	assert.Equal(t, req.ClientID, ctx.ClientID)
 	assert.Equal(t, req.Scope, ctx.RequestedScopes)
 	assert.Equal(t, viper.GetString("authorization.consent-url"), ctx.AuthorizationURL)
-	assert.NotEmpty(t, ctx.SignedAuthorizationRequest)
+	assert.NotEmpty(t, ctx.SignedAuthorizationContext)
 }
 
 func TestRejectApproveAuthorizationIfSignatureIsInvalid(t *testing.T) {
@@ -59,7 +59,7 @@ func TestRejectApproveAuthorizationIfSignatureIsInvalid(t *testing.T) {
 	approveReq := authorization.ApproveAuthorizationRequest{
 		ApprovedByUser:             true,
 		AuthorizationCode:          "authorization-code",
-		SignedAuthorizationRequest: ctx.SignedAuthorizationRequest + "tampered",
+		SignedAuthorizationRequest: ctx.SignedAuthorizationContext + "tampered",
 	}
 
 	_, err := service.ApproveAuthorization(approveReq)
@@ -80,7 +80,7 @@ func TestDeniedAuthorization(t *testing.T) {
 	approveReq := authorization.ApproveAuthorizationRequest{
 		ApprovedByUser:             false,
 		AuthorizationCode:          "authorization-code",
-		SignedAuthorizationRequest: ctx.SignedAuthorizationRequest,
+		SignedAuthorizationRequest: ctx.SignedAuthorizationContext,
 	}
 
 	resp, err := service.ApproveAuthorization(approveReq)
@@ -105,7 +105,7 @@ func TestSuccessfulAuthorization(t *testing.T) {
 	approveReq := authorization.ApproveAuthorizationRequest{
 		ApprovedByUser:             true,
 		AuthorizationCode:          "authorization-code",
-		SignedAuthorizationRequest: ctx.SignedAuthorizationRequest,
+		SignedAuthorizationRequest: ctx.SignedAuthorizationContext,
 	}
 
 	resp, err := service.ApproveAuthorization(approveReq)

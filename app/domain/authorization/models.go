@@ -18,7 +18,7 @@ type AuthozirationContext struct {
 	AuthorizationURL           string
 	ClientID                   string
 	RequestedScopes            []string
-	SignedAuthorizationRequest string
+	SignedAuthorizationContext string
 }
 
 type AuthorizationReponse struct {
@@ -27,10 +27,9 @@ type AuthorizationReponse struct {
 	SignedAuthorizationCode string
 }
 
-type ExchangeAuthorizationCode struct {
+type ExchangeAuthorizationCodeRequest struct {
 	ClientID                string
 	ClientSecret            string
 	GrantType               string
-	State                   string
 	SignedAuthorizationCode string
 }

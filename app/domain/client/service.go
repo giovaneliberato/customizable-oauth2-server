@@ -34,7 +34,7 @@ func (s *service) Save(c Client) error {
 		return err
 	}
 
-	c.HashedSecret = hashSecret(c.RawSecret)
+	c.HashedSecret = HashSecret(c.RawSecret)
 	c.RawSecret = ""
 	s.repository.Save(c)
 
@@ -45,7 +45,7 @@ func (s *service) ValidateSecret(c Client, secret string) error {
 	return nil
 }
 
-func hashSecret(rawSecret string) []byte {
+func HashSecret(rawSecret string) []byte {
 	hash := sha512.New()
 	hash.Write([]byte(rawSecret))
 	return hash.Sum(nil)

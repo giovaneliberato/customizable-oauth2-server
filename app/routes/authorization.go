@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"goauth-extension/app/domain"
 	"goauth-extension/app/domain/authorization"
 	"net/http"
 	"net/url"
@@ -65,7 +66,7 @@ func (a *authorizationRoutes) ProcessAuthorization(w http.ResponseWriter, r *htt
 	http.Redirect(w, r, redirectURI, http.StatusFound)
 }
 
-func proccessError(w http.ResponseWriter, r *http.Request, errorRedirectURL, state string, err *authorization.AuthorizationError) {
+func proccessError(w http.ResponseWriter, r *http.Request, errorRedirectURL, state string, err *domain.OAuthError) {
 	if err.Abort {
 		// This avoid open redirect attacks
 		jsonBody, _ := json.Marshal(err)
@@ -103,7 +104,7 @@ func buildApprovalRedirectURI(ctx authorization.AuthozirationContext) string {
 	qs := url.Values{}
 	qs.Add("client_id", ctx.ClientID)
 	qs.Add("requested_scopes", strings.Join(ctx.RequestedScopes, " "))
-	qs.Add("signed_context", ctx.SignedAuthorizationRequest)
+	qs.Add("signed_context", ctx.SignedAuthorizationContext)
 
 	return ctx.AuthorizationURL + "?" + qs.Encode()
 }

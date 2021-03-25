@@ -1,15 +1,16 @@
 package authorization
 
 import (
+	"goauth-extension/app/domain"
 	"goauth-extension/app/domain/client"
 
 	"github.com/spf13/viper"
 )
 
 type Service interface {
-	Authorize(AuthorizationRequest) (AuthozirationContext, *AuthorizationError)
-	ApproveAuthorization(ApproveAuthorizationRequest) (AuthorizationReponse, *AuthorizationError)
-	//ExchangeAuthorizationCode() (AuthorizationReponse, *AuthorizationError)
+	Authorize(AuthorizationRequest) (AuthozirationContext, *domain.OAuthError)
+	ApproveAuthorization(ApproveAuthorizationRequest) (AuthorizationReponse, *domain.OAuthError)
+	ExchangeAuthorizationCode(ExchangeAuthorizationCodeRequest) (AuthorizationReponse, *domain.OAuthError)
 }
 
 type service struct {
@@ -26,7 +27,7 @@ func NewService(client client.Service, signer TokenSigner) Service {
 	}
 }
 
-func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext, *AuthorizationError) {
+func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext, *domain.OAuthError) {
 	client := s.client.GetByID(request.ClientID)
 
 	err := Validate(client, request)
@@ -38,17 +39,17 @@ func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext,
 		AuthorizationURL:           s.authorizationURL,
 		ClientID:                   client.ID,
 		RequestedScopes:            request.Scope,
-		SignedAuthorizationRequest: s.buildToken(request),
+		SignedAuthorizationContext: s.buildAuthorizationContext(request),
 	}
 
 	return ctx, nil
 }
 
-func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorizationRequest) (AuthorizationReponse, *AuthorizationError) {
+func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorizationRequest) (AuthorizationReponse, *domain.OAuthError) {
 	claims, err := s.tokenSigner.VerifyAndDecode(approveAuthorization.SignedAuthorizationRequest)
 
 	if err != nil {
-		return AuthorizationReponse{}, InvalidApproveAuthorizationError
+		return AuthorizationReponse{}, domain.InvalidApproveAuthorizationError
 	}
 
 	if !approveAuthorization.ApprovedByUser {
@@ -57,7 +58,7 @@ func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorization
 			State:       claims.State,
 		}
 
-		return resp, AccessDeniedError
+		return resp, domain.AccessDeniedError
 	}
 
 	signedAuthorizationCode := s.buildAuthorizationCodeToken(claims, approveAuthorization)
@@ -69,7 +70,11 @@ func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorization
 	}, nil
 }
 
-func (s *service) buildToken(req AuthorizationRequest) string {
+func (s *service) ExchangeAuthorizationCode(r ExchangeAuthorizationCodeRequest) (AuthorizationReponse, *domain.OAuthError) {
+	return AuthorizationReponse{}, nil
+}
+
+func (s *service) buildAuthorizationContext(req AuthorizationRequest) string {
 	claims := ContextClaims{
 		ClientID:    req.ClientID,
 		State:       req.State,

@@ -1,40 +1,40 @@
-package authorization
+package domain
 
-type AuthorizationError struct {
-	Err              string `json:"error,omitempty"`
+type OAuthError struct {
+	Err              string `json:"error"`
 	ErrorDescription string `json:"error_description,omitempty"`
 	Abort            bool   `json:"-"`
 }
 
-func (e *AuthorizationError) Empty() bool {
+func (e *OAuthError) Empty() bool {
 	return e.Err == ""
 }
 
-var InvalidApproveAuthorizationError = &AuthorizationError{
+var InvalidApproveAuthorizationError = &OAuthError{
 	Err:              "invalid_request",
 	ErrorDescription: "Could not proccess approval request",
 	Abort:            true,
 }
 
-var AccessDeniedError = &AuthorizationError{
+var AccessDeniedError = &OAuthError{
 	Err:              "access_denied",
 	ErrorDescription: "The user or the authorization server denied the request",
 	Abort:            false,
 }
 
-var InvalidClientError = &AuthorizationError{
+var InvalidClientError = &OAuthError{
 	Err:              "invalid_request",
 	ErrorDescription: "Invalid client details",
 	Abort:            true,
 }
 
-var UnsupportedResponseTypeError = &AuthorizationError{
+var UnsupportedResponseTypeError = &OAuthError{
 	Err:              "unsupported_response_type",
 	ErrorDescription: "Unsupported response type",
 	Abort:            false,
 }
 
-var InvalidScopeError = &AuthorizationError{
+var InvalidScopeError = &OAuthError{
 	Err:              "invalid_scope",
 	ErrorDescription: "Requested scopes are not valid",
 	Abort:            false,

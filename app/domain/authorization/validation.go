@@ -1,22 +1,25 @@
 package authorization
 
-import "goauth-extension/app/domain/client"
+import (
+	"goauth-extension/app/domain"
+	"goauth-extension/app/domain/client"
+)
 
-func Validate(client client.Client, data AuthorizationRequest) *AuthorizationError {
+func Validate(client client.Client, data AuthorizationRequest) *domain.OAuthError {
 	if client.ID == "" || client.ID != data.ClientID {
-		return InvalidClientError
+		return domain.InvalidClientError
 	}
 
 	if notIn(data.RedirectURI, client.AllowedRedirectUrls) {
-		return InvalidClientError
+		return domain.InvalidClientError
 	}
 
 	if notIn(data.GrantType, client.AllowedGrantTypes) {
-		return UnsupportedResponseTypeError
+		return domain.UnsupportedResponseTypeError
 	}
 
 	if oneItemNotIn(data.Scope, client.AllowedScopes) {
-		return InvalidScopeError
+		return domain.InvalidScopeError
 	}
 
 	return nil

@@ -10,6 +10,7 @@ import (
 type ContextClaims struct {
 	ClientID          string
 	State             string
+	ResponseType      string
 	Scope             []string
 	RedirectURI       string
 	AuthorizationCode string
@@ -47,12 +48,13 @@ func (t *tokenSigner) SignAndEncode(claims ContextClaims) (string, error) {
 	now := jwt.TimeFunc()
 
 	mapClaims := jwt.MapClaims{
-		"iss":          t.tokenIssuer,
-		"iat":          now.Unix(),
-		"exp":          now.Add(t.expirationSeconds).Unix(),
-		"client_id":    claims.ClientID,
-		"redirect_uri": claims.RedirectURI,
-		"scope":        claims.Scope,
+		"iss":           t.tokenIssuer,
+		"iat":           now.Unix(),
+		"exp":           now.Add(t.expirationSeconds).Unix(),
+		"client_id":     claims.ClientID,
+		"redirect_uri":  claims.RedirectURI,
+		"scope":         claims.Scope,
+		"response_type": claims.ResponseType,
 	}
 
 	if claims.State != "" {
