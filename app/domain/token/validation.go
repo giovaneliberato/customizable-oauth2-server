@@ -20,6 +20,10 @@ func ValidateContext(req AuthorizationCodeRequest, ctx authorization.ContextClai
 }
 
 func ValidateClient(req AuthorizationCodeRequest, c client.Client) *domain.OAuthError {
+	if c.ID == "" || c.ID != req.ClientID {
+		return domain.InvalidClientError
+	}
+
 	if bytes.Compare([]byte(c.HashedSecret), client.HashSecret(req.ClientSecret)) != 0 {
 		return domain.InvalidClientError
 	}

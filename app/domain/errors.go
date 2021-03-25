@@ -10,6 +10,16 @@ func (e *OAuthError) Empty() bool {
 	return e.Err == ""
 }
 
+func (e *OAuthError) Error() string {
+	return e.Err
+}
+
+var InvalidAuthorizationCodeRequestError = &OAuthError{
+	Err:              "invalid_request",
+	ErrorDescription: "Could not proccess authorization code request",
+	Abort:            true,
+}
+
 var InvalidApproveAuthorizationError = &OAuthError{
 	Err:              "invalid_request",
 	ErrorDescription: "Could not proccess approval request",

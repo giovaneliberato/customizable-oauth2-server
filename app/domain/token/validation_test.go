@@ -11,8 +11,6 @@ import (
 )
 
 func TestGrantTypeNotMatch(t *testing.T) {
-	test.ConfigureTestScenario()
-
 	ctx := authorization.ContextClaims{
 		AuthorizationCode: "xpto",
 		ClientID:          test.TestClient.ID,
@@ -33,11 +31,9 @@ func TestGrantTypeNotMatch(t *testing.T) {
 	assert.Equal(t, domain.UnsupportedResponseTypeError, err)
 }
 
-func TestClientSecretDoNotMatch(t *testing.T) {
-	test.ConfigureTestScenario()
-
+func TestClientIDDoNotMatch(t *testing.T) {
 	req := token.AuthorizationCodeRequest{
-		ClientID:     test.TestClient.ID,
+		ClientID:     "not-the-same-id",
 		ClientSecret: test.TestClient.RawSecret,
 		GrantType:    "code",
 	}
@@ -45,4 +41,27 @@ func TestClientSecretDoNotMatch(t *testing.T) {
 	err := token.ValidateClient(req, test.TestClient)
 	assert.NotNil(t, err)
 	assert.Equal(t, domain.InvalidClientError, err)
+}
+
+func TestClientSecretDoNotMatch(t *testing.T) {
+	req := token.AuthorizationCodeRequest{
+		ClientID:     test.TestClient.ID,
+		ClientSecret: "not-the-same-secret",
+		GrantType:    "code",
+	}
+
+	err := token.ValidateClient(req, test.TestClient)
+	assert.NotNil(t, err)
+	assert.Equal(t, domain.InvalidClientError, err)
+}
+
+func TestClientValidationSuccess(t *testing.T) {
+	req := token.AuthorizationCodeRequest{
+		ClientID:     test.TestClient.ID,
+		ClientSecret: test.TestClient.RawSecret,
+		GrantType:    "code",
+	}
+
+	err := token.ValidateClient(req, test.TestClient)
+	assert.Nil(t, err)
 }

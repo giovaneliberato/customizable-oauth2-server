@@ -85,6 +85,7 @@ func (t *tokenSigner) VerifyAndDecode(token string) (ContextClaims, error) {
 		State:             valueOrEmpty(parsedClaims, "state"),
 		AuthorizationCode: valueOrEmpty(parsedClaims, "authorization_code"),
 		RedirectURI:       parsedClaims["redirect_uri"].(string),
+		ResponseType:      parsedClaims["response_type"].(string),
 	}
 
 	return claims, nil
