@@ -35,6 +35,7 @@ func TestClientWithEmptyStringAsUrl(t *testing.T) {
 
 	err := service.Save(client.Client{
 		ID:                   "client-id",
+		Name:                 "Test App",
 		AllowedScopes:        []string{"profile"},
 		AllowedResponseTypes: []string{"code"},
 		AllowedRedirectUrls:  []string{""},
@@ -69,6 +70,7 @@ func TestClientSuccess(t *testing.T) {
 
 	err := service.Save(client.Client{
 		ID:                   "client-id",
+		Name:                 "Test App",
 		AllowedResponseTypes: []string{"code"},
 		AllowedRedirectUrls:  []string{"https://my-app.com"},
 		AllowedScopes:        []string{"profile"},

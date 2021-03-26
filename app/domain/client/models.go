@@ -1,10 +1,11 @@
 package client
 
 type Client struct {
-	ID                   string   `json:"client_id,required"`
-	RawSecret            string   `json:"secret,required"`
+	ID                   string   `json:"id"`
+	Name                 string   `json:"name"`
+	RawSecret            string   `json:"secret"`
 	HashedSecret         []byte   `json:"-"`
-	AllowedRedirectUrls  []string `json:"allowed_redirect_urls,required"`
-	AllowedResponseTypes []string `json:"allowed_grant_types,required"`
-	AllowedScopes        []string `json:"allowed_scopes,required"`
+	AllowedRedirectUrls  []string `json:"allowed_redirect_urls"`
+	AllowedResponseTypes []string `json:"allowed_grant_types"`
+	AllowedScopes        []string `json:"allowed_scopes"`
 }

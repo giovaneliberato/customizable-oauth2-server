@@ -52,8 +52,12 @@ func HashSecret(rawSecret string) []byte {
 }
 
 func validate(c Client) error {
+	if c.ID == "" || c.Name == "" || c.RawSecret == "" {
+		return errors.New("Missing client information")
+	}
+
 	if !supportedResponseType(c.AllowedResponseTypes) {
-		return errors.New("Grant type not supported")
+		return errors.New("Grant type not supported by server")
 	}
 
 	if len(c.AllowedRedirectUrls) == 0 {
