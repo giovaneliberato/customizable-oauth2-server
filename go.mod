@@ -1,4 +1,4 @@
-module goauth-extension
+module your-oauth2-server-here 
 
 go 1.16
 
