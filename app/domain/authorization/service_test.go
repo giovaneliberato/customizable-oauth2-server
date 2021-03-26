@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNotBuildConsentContextIfValidationFails(t *testing.T) {
+func TestNotBuildAuthorizationContextIfValidationFails(t *testing.T) {
 	infra.LoadConfig()
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = client.Client{}
@@ -43,6 +43,7 @@ func TestBuildAuthorizationContext(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, req.ClientID, ctx.ClientID)
+	assert.Equal(t, ctx.ClientName, test.TestClient.Name)
 	assert.Equal(t, req.Scope, ctx.RequestedScopes)
 	assert.Equal(t, viper.GetString("authorization.consent-url"), ctx.AuthorizationURL)
 	assert.NotEmpty(t, ctx.SignedAuthorizationContext)

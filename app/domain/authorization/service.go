@@ -38,6 +38,7 @@ func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext,
 	ctx := AuthozirationContext{
 		AuthorizationURL:           s.authorizationURL,
 		ClientID:                   client.ID,
+		ClientName:                 client.Name,
 		RequestedScopes:            request.Scope,
 		SignedAuthorizationContext: s.buildAuthorizationContext(request),
 	}
@@ -46,7 +47,7 @@ func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext,
 }
 
 func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorizationRequest) (AuthorizationReponse, *domain.OAuthError) {
-	Context, err := s.contextSigner.VerifyAndDecode(approveAuthorization.SignedAuthorizationRequest)
+	context, err := s.contextSigner.VerifyAndDecode(approveAuthorization.SignedAuthorizationRequest)
 
 	if err != nil {
 		return AuthorizationReponse{}, domain.InvalidApproveAuthorizationError
@@ -54,19 +55,19 @@ func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorization
 
 	if !approveAuthorization.ApprovedByUser {
 		resp := AuthorizationReponse{
-			RedirectURI: Context.RedirectURI,
-			State:       Context.State,
+			RedirectURI: context.RedirectURI,
+			State:       context.State,
 		}
 
 		return resp, domain.AccessDeniedError
 	}
 
-	signedAuthorizationCode := s.buildAuthorizationCodeContext(Context, approveAuthorization)
+	signedAuthorizationCode := s.buildAuthorizationCodeContext(context, approveAuthorization)
 
 	return AuthorizationReponse{
 		SignedAuthorizationCode: signedAuthorizationCode,
-		State:                   Context.State,
-		RedirectURI:             Context.RedirectURI,
+		State:                   context.State,
+		RedirectURI:             context.RedirectURI,
 	}, nil
 }
 
@@ -75,25 +76,25 @@ func (s *service) ExchangeAuthorizationCode(r ExchangeAuthorizationCodeRequest) 
 }
 
 func (s *service) buildAuthorizationContext(req AuthorizationRequest) string {
-	Context := Context{
+	context := Context{
 		ClientID:    req.ClientID,
 		State:       req.State,
 		Scope:       req.Scope,
 		RedirectURI: req.RedirectURI,
 	}
 
-	signedContext, _ := s.contextSigner.SignAndEncode(Context)
+	signedContext, _ := s.contextSigner.SignAndEncode(context)
 	return signedContext
 }
 
 func (s *service) buildAuthorizationCodeContext(ctx Context, approveAuthorization ApproveAuthorizationRequest) string {
-	Context := Context{
+	context := Context{
 		ClientID:          ctx.ClientID,
 		Scope:             ctx.Scope,
 		RedirectURI:       ctx.RedirectURI,
 		AuthorizationCode: approveAuthorization.AuthorizationCode,
 	}
 
-	signedContext, _ := s.contextSigner.SignAndEncode(Context)
+	signedContext, _ := s.contextSigner.SignAndEncode(context)
 	return signedContext
 }

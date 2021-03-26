@@ -17,6 +17,7 @@ type ApproveAuthorizationRequest struct {
 type AuthozirationContext struct {
 	AuthorizationURL           string
 	ClientID                   string
+	ClientName                 string
 	RequestedScopes            []string
 	SignedAuthorizationContext string
 }
