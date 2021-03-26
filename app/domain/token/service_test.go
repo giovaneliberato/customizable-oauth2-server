@@ -36,33 +36,6 @@ func TestInvalidSignedAuthorizationCode(t *testing.T) {
 	assert.Empty(t, accessToken.AccessToken)
 }
 
-func TestInvalidContext(t *testing.T) {
-	contextSigner := getContextSigner()
-	service := buildTestService()
-
-	ctx := authorization.Context{
-		ClientID:          test.TestClient.ID,
-		ResponseType:      "code",
-		Scope:             test.TestClient.AllowedScopes,
-		RedirectURI:       test.TestClient.AllowedRedirectUrls[0],
-		AuthorizationCode: "some-authorization-code",
-	}
-
-	signedAuthCode, _ := contextSigner.SignAndEncode(ctx)
-
-	req := token.AuthorizationCodeRequest{
-		ClientID:                test.TestClient.ID,
-		ClientSecret:            test.TestClient.RawSecret,
-		GrantType:               "authorization_code",
-		SignedAuthorizationCode: signedAuthCode,
-	}
-
-	accessToken, err := service.Exchange(req)
-
-	assert.NotNil(t, err)
-	assert.Empty(t, accessToken.AccessToken)
-}
-
 func TestInvalidClient(t *testing.T) {
 	contextSigner := getContextSigner()
 	service := buildTestService()

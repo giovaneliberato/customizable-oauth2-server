@@ -12,10 +12,6 @@ func ValidateContext(req AuthorizationCodeRequest, ctx authorization.Context) *d
 		return domain.InvalidClientError
 	}
 
-	//if req.ResponseType != ctx.ResponseType {
-	//	return domain.UnsupportedResponseTypeError
-	//}
-
 	return nil
 }
 

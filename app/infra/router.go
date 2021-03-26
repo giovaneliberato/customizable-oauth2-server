@@ -1,14 +1,18 @@
-package routes
+package infra
 
-import "github.com/go-chi/chi"
+import (
+	"goauth-extension/app/routes"
+
+	"github.com/go-chi/chi"
+)
 
 var applicationRoutes = []func(*chi.Mux){
-	AuthorizationRouter,
-	TokenRouter,
+	routes.AuthorizationRouter,
+	routes.TokenRouter,
 }
 
 var managementRoutes = []func(*chi.Mux){
-	ClienRouter,
+	routes.ClienRouter,
 }
 
 func ConfigApplicationRoutes(r *chi.Mux) {
