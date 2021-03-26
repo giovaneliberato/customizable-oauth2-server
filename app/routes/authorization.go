@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"encoding/json"
-	"goauth-extension/app/domain"
 	"goauth-extension/app/domain/authorization"
 	"net/http"
 	"net/url"
@@ -38,7 +36,7 @@ func NewAuthorizationRoutes(service authorization.Service) AuthorizationRoutes {
 }
 
 func (a *authorizationRoutes) Authorize(w http.ResponseWriter, r *http.Request) {
-	authRequest := parse(r.URL.Query())
+	authRequest := parseAuthorizationRequest(r.URL.Query())
 
 	context, err := a.service.Authorize(authRequest)
 
@@ -53,7 +51,7 @@ func (a *authorizationRoutes) Authorize(w http.ResponseWriter, r *http.Request) 
 }
 
 func (a *authorizationRoutes) ProcessAuthorization(w http.ResponseWriter, r *http.Request) {
-	approvalRequest := parseForm(r)
+	approvalRequest := parseAuthorizationApproval(r)
 	resp, err := a.service.ApproveAuthorization(approvalRequest)
 
 	if err != nil {
@@ -66,22 +64,7 @@ func (a *authorizationRoutes) ProcessAuthorization(w http.ResponseWriter, r *htt
 	http.Redirect(w, r, redirectURI, http.StatusFound)
 }
 
-func proccessError(w http.ResponseWriter, r *http.Request, errorRedirectURL, state string, err *domain.OAuthError) {
-	if err.Abort {
-		// This avoid open redirect attacks
-		jsonBody, _ := json.Marshal(err)
-		http.Error(w, string(jsonBody), http.StatusUnauthorized)
-	} else {
-		qs := url.Values{}
-		qs.Add("error", err.Err)
-		qs.Add("error_description", err.ErrorDescription)
-		qs.Add("state", state)
-		errorRedirectURL += "?" + qs.Encode()
-		http.Redirect(w, r, errorRedirectURL, http.StatusFound)
-	}
-}
-
-func parse(qs url.Values) authorization.AuthorizationRequest {
+func parseAuthorizationRequest(qs url.Values) authorization.AuthorizationRequest {
 	return authorization.AuthorizationRequest{
 		ClientID:     qs.Get("client_id"),
 		ResponseType: qs.Get("response_type"),
@@ -91,7 +74,7 @@ func parse(qs url.Values) authorization.AuthorizationRequest {
 	}
 }
 
-func parseForm(r *http.Request) authorization.ApproveAuthorizationRequest {
+func parseAuthorizationApproval(r *http.Request) authorization.ApproveAuthorizationRequest {
 	approved, _ := strconv.ParseBool(r.FormValue("approved"))
 	return authorization.ApproveAuthorizationRequest{
 		ApprovedByUser:             approved,

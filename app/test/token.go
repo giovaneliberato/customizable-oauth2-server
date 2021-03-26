@@ -12,7 +12,7 @@ type ExternalServiceClientMock struct {
 	ReturnError bool
 }
 
-func (c *ExternalServiceClientMock) GetAccess(ctx authorization.Context) (token.AccessTokenResponse, *domain.OAuthError) {
+func (c *ExternalServiceClientMock) GetAccessToken(ctx authorization.Context) (token.AccessTokenResponse, *domain.OAuthError) {
 	if c.ReturnError {
 		return token.AccessTokenResponse{}, &domain.OAuthError{}
 	}

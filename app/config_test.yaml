@@ -1,7 +1,7 @@
 
 
 jwt:
-  signing-key: "RNjSnEZ89FqOA33oPpnyPavx0WHDIJbenzzcRtA7"
+  signing-key: "test-key"
   issuer: "test-app"
   expiration-seconds: 120
 

@@ -4,9 +4,12 @@ import "github.com/go-chi/chi"
 
 var applicationRoutes = []func(*chi.Mux){
 	AuthorizationRouter,
+	TokenRouter,
 }
 
-var managementRoutes = []func(*chi.Mux){}
+var managementRoutes = []func(*chi.Mux){
+	ClienRouter,
+}
 
 func ConfigApplicationRoutes(r *chi.Mux) {
 	configureRoutes(r, applicationRoutes)

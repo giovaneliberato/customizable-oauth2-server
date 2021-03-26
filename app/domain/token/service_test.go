@@ -26,7 +26,7 @@ func TestInvalidSignedAuthorizationCode(t *testing.T) {
 	req := token.AuthorizationCodeRequest{
 		ClientID:                test.TestClient.ID,
 		ClientSecret:            test.TestClient.RawSecret,
-		ResponseType:            "code",
+		GrantType:               "authorization_code",
 		SignedAuthorizationCode: signedAuthCode + "tampered",
 	}
 
@@ -53,7 +53,7 @@ func TestInvalidContext(t *testing.T) {
 	req := token.AuthorizationCodeRequest{
 		ClientID:                test.TestClient.ID,
 		ClientSecret:            test.TestClient.RawSecret,
-		ResponseType:            "another-response-type",
+		GrantType:               "authorization_code",
 		SignedAuthorizationCode: signedAuthCode,
 	}
 
@@ -80,7 +80,7 @@ func TestInvalidClient(t *testing.T) {
 	req := token.AuthorizationCodeRequest{
 		ClientID:                "another-client-id",
 		ClientSecret:            test.TestClient.RawSecret,
-		ResponseType:            "code",
+		GrantType:               "authorization_code",
 		SignedAuthorizationCode: signedAuthCode,
 	}
 
@@ -112,7 +112,7 @@ func TestInvalidExternalError(t *testing.T) {
 	req := token.AuthorizationCodeRequest{
 		ClientID:                test.TestClient.ID,
 		ClientSecret:            test.TestClient.RawSecret,
-		ResponseType:            "code",
+		GrantType:               "authorization_code",
 		SignedAuthorizationCode: signedAuthCode,
 	}
 
@@ -139,7 +139,7 @@ func TestExchangeSuccess(t *testing.T) {
 	req := token.AuthorizationCodeRequest{
 		ClientID:                test.TestClient.ID,
 		ClientSecret:            test.TestClient.RawSecret,
-		ResponseType:            "code",
+		GrantType:               "authorization_code",
 		SignedAuthorizationCode: signedAuthCode,
 	}
 

@@ -8,19 +8,27 @@ import (
 	"github.com/spf13/viper"
 )
 
-func rootDir() string {
-	_, b, _, _ := runtime.Caller(0)
-	d := path.Join(path.Dir(b))
-	return filepath.Dir(d)
+func LoadConfig() {
+	loadConfig("config")
 }
 
-func LoadConfig() {
+func LoadTestConfig() {
+	loadConfig("config_test")
+}
+
+func loadConfig(filename string) {
 	viper.AddConfigPath(rootDir())
-	viper.SetConfigName("config")
+	viper.SetConfigName(filename)
 	viper.SetConfigType("yaml")
 
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(err)
 	}
+}
+
+func rootDir() string {
+	_, b, _, _ := runtime.Caller(0)
+	d := path.Join(path.Dir(b))
+	return filepath.Dir(d)
 }
