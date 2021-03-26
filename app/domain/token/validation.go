@@ -2,9 +2,9 @@ package token
 
 import (
 	"bytes"
-	"goauth-extension/app/domain"
-	"goauth-extension/app/domain/authorization"
-	"goauth-extension/app/domain/client"
+	"oauth2-server/app/domain"
+	"oauth2-server/app/domain/authorization"
+	"oauth2-server/app/domain/client"
 )
 
 func ValidateContext(req AuthorizationCodeRequest, ctx authorization.Context) *domain.OAuthError {

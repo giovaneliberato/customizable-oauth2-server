@@ -2,9 +2,9 @@ package routes
 
 import (
 	"encoding/json"
-	"goauth-extension/app/domain"
 	"net/http"
 	"net/url"
+	"oauth2-server/app/domain"
 )
 
 func proccessError(w http.ResponseWriter, r *http.Request, errorRedirectURL, state string, err *domain.OAuthError) {

@@ -1,10 +1,10 @@
 package authorization_test
 
 import (
-	"goauth-extension/app/domain/authorization"
-	"goauth-extension/app/domain/client"
-	"goauth-extension/app/infra"
-	"goauth-extension/app/test"
+	"oauth2-server/app/domain/authorization"
+	"oauth2-server/app/domain/client"
+	"oauth2-server/app/infra"
+	"oauth2-server/app/test"
 	"testing"
 
 	"github.com/spf13/viper"

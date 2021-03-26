@@ -3,10 +3,10 @@ package routes_test
 import (
 	"bytes"
 	"encoding/json"
-	"goauth-extension/app/domain"
-	"goauth-extension/app/routes"
-	"goauth-extension/app/test"
 	"net/http"
+	"oauth2-server/app/domain"
+	"oauth2-server/app/routes"
+	"oauth2-server/app/test"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

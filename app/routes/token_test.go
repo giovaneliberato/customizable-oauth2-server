@@ -2,13 +2,13 @@ package routes_test
 
 import (
 	"encoding/json"
-	"goauth-extension/app/domain"
-	"goauth-extension/app/domain/authorization"
-	"goauth-extension/app/domain/token"
-	"goauth-extension/app/routes"
-	"goauth-extension/app/test"
 	"net/http"
 	"net/url"
+	"oauth2-server/app/domain"
+	"oauth2-server/app/domain/authorization"
+	"oauth2-server/app/domain/token"
+	"oauth2-server/app/routes"
+	"oauth2-server/app/test"
 	"testing"
 
 	"github.com/golobby/container/v2"

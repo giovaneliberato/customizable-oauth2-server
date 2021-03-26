@@ -1,7 +1,7 @@
 package test
 
 import (
-	"goauth-extension/app/domain/client"
+	"oauth2-server/app/domain/client"
 
 	"github.com/stretchr/testify/mock"
 )

@@ -1,9 +1,9 @@
 package test
 
 import (
-	"goauth-extension/app/domain"
-	"goauth-extension/app/domain/authorization"
-	"goauth-extension/app/domain/token"
+	"oauth2-server/app/domain"
+	"oauth2-server/app/domain/authorization"
+	"oauth2-server/app/domain/token"
 
 	"github.com/google/uuid"
 )

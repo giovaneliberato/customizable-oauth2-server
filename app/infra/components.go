@@ -1,10 +1,10 @@
 package infra
 
 import (
-	"goauth-extension/app/domain/authorization"
-	"goauth-extension/app/domain/client"
-	"goauth-extension/app/domain/token"
-	"goauth-extension/app/routes"
+	"oauth2-server/app/domain/authorization"
+	"oauth2-server/app/domain/client"
+	"oauth2-server/app/domain/token"
+	"oauth2-server/app/routes"
 
 	"github.com/golobby/container/v2"
 )

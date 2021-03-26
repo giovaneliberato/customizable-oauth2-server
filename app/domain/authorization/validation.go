@@ -1,8 +1,8 @@
 package authorization
 
 import (
-	"goauth-extension/app/domain"
-	"goauth-extension/app/domain/client"
+	"oauth2-server/app/domain"
+	"oauth2-server/app/domain/client"
 )
 
 func Validate(client client.Client, data AuthorizationRequest) *domain.OAuthError {

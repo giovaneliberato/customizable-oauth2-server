@@ -2,12 +2,12 @@ package routes_test
 
 import (
 	"encoding/json"
-	"goauth-extension/app/domain"
-	"goauth-extension/app/domain/authorization"
-	"goauth-extension/app/routes"
-	"goauth-extension/app/test"
 	"net/http"
 	"net/url"
+	"oauth2-server/app/domain"
+	"oauth2-server/app/domain/authorization"
+	"oauth2-server/app/routes"
+	"oauth2-server/app/test"
 	"strings"
 	"testing"
 

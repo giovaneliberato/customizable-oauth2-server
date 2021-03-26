@@ -1,9 +1,9 @@
 package token_test
 
 import (
-	"goauth-extension/app/domain"
-	"goauth-extension/app/domain/token"
-	"goauth-extension/app/test"
+	"oauth2-server/app/domain"
+	"oauth2-server/app/domain/token"
+	"oauth2-server/app/test"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

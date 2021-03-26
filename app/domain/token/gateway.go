@@ -1,8 +1,8 @@
 package token
 
 import (
-	"goauth-extension/app/domain"
-	"goauth-extension/app/domain/authorization"
+	"oauth2-server/app/domain"
+	"oauth2-server/app/domain/authorization"
 
 	"github.com/google/uuid"
 )

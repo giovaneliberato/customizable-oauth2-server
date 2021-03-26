@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"goauth-extension/app/domain/authorization"
 	"net/http"
 	"net/url"
+	"oauth2-server/app/domain/authorization"
 	"strconv"
 	"strings"
 

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"goauth-extension/app/infra"
 	"net/http"
+	"oauth2-server/app/infra"
 
 	"github.com/go-chi/chi"
 )

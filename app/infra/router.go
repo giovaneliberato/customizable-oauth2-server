@@ -1,7 +1,7 @@
 package infra
 
 import (
-	"goauth-extension/app/routes"
+	"oauth2-server/app/routes"
 
 	"github.com/go-chi/chi"
 )

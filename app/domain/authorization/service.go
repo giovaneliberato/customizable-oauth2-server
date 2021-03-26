@@ -1,8 +1,8 @@
 package authorization
 
 import (
-	"goauth-extension/app/domain"
-	"goauth-extension/app/domain/client"
+	"oauth2-server/app/domain"
+	"oauth2-server/app/domain/client"
 
 	"github.com/spf13/viper"
 )

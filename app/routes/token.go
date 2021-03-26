@@ -2,8 +2,8 @@ package routes
 
 import (
 	"encoding/json"
-	"goauth-extension/app/domain/token"
 	"net/http"
+	"oauth2-server/app/domain/token"
 
 	"github.com/go-chi/chi"
 	"github.com/golobby/container/v2"

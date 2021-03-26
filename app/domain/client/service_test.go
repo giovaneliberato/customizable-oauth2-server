@@ -1,8 +1,8 @@
 package client_test
 
 import (
-	"goauth-extension/app/domain/client"
-	"goauth-extension/app/infra"
+	"oauth2-server/app/domain/client"
+	"oauth2-server/app/infra"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

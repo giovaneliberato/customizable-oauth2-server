@@ -1,9 +1,9 @@
 package token_test
 
 import (
-	"goauth-extension/app/domain/authorization"
-	"goauth-extension/app/domain/token"
-	"goauth-extension/app/test"
+	"oauth2-server/app/domain/authorization"
+	"oauth2-server/app/domain/token"
+	"oauth2-server/app/test"
 	"testing"
 
 	"github.com/golobby/container/v2"

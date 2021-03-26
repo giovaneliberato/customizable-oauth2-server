@@ -1,9 +1,9 @@
 package test
 
 import (
-	"goauth-extension/app/domain/client"
-	"goauth-extension/app/infra"
 	"net/http/httptest"
+	"oauth2-server/app/domain/client"
+	"oauth2-server/app/infra"
 	"path"
 	"path/filepath"
 	"runtime"

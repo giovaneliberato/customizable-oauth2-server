@@ -1,7 +1,7 @@
 package authorization_test
 
 import (
-	"goauth-extension/app/domain/authorization"
+	"oauth2-server/app/domain/authorization"
 	"testing"
 	"time"
 

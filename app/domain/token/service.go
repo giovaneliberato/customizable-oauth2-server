@@ -1,9 +1,9 @@
 package token
 
 import (
-	"goauth-extension/app/domain"
-	"goauth-extension/app/domain/authorization"
-	"goauth-extension/app/domain/client"
+	"oauth2-server/app/domain"
+	"oauth2-server/app/domain/authorization"
+	"oauth2-server/app/domain/client"
 )
 
 type Service interface {
