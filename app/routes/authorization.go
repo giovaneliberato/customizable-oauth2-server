@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/url"
 	"oauth2-server/app/domain/authorization"
-	"oauth2-server/app/domain/token"
 	"strconv"
 	"strings"
 
@@ -27,14 +26,12 @@ type AuthorizationRoutes interface {
 }
 
 type authorizationRoutes struct {
-	service      authorization.Service
-	tokenService token.Service
+	service authorization.Service
 }
 
-func NewAuthorizationRoutes(service authorization.Service, tokenService token.Service) AuthorizationRoutes {
+func NewAuthorizationRoutes(service authorization.Service) AuthorizationRoutes {
 	return &authorizationRoutes{
-		service:      service,
-		tokenService: tokenService,
+		service: service,
 	}
 }
 
@@ -59,16 +56,6 @@ func (a *authorizationRoutes) ProcessAuthorization(w http.ResponseWriter, r *htt
 
 	if err != nil {
 		proccessError(w, r, resp.RedirectURI, resp.State, err)
-		return
-	}
-
-	if resp.TokenResponseType() {
-		accessToken, err := a.tokenService.ExchangeWithoutValidation(resp.SignedAuthorizationCode)
-		if err != nil {
-			proccessError(w, r, resp.RedirectURI, resp.State, err)
-			return
-		}
-		renderAccessTokenResponse(w, accessToken)
 		return
 	}
 

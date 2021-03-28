@@ -25,7 +25,6 @@ type AuthozirationContext struct {
 type AuthorizationReponse struct {
 	RedirectURI             string
 	State                   string
-	ResponseType            string
 	SignedAuthorizationCode string
 }
 
@@ -34,8 +33,4 @@ type ExchangeAuthorizationCodeRequest struct {
 	ClientSecret            string
 	ResponseType            string
 	SignedAuthorizationCode string
-}
-
-func (r *AuthorizationReponse) TokenResponseType() bool {
-	return r.ResponseType == "token"
 }

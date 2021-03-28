@@ -8,7 +8,6 @@ import (
 
 type Service interface {
 	Exchange(AuthorizationCodeRequest) (AccessTokenResponse, *domain.OAuthError)
-	ExchangeWithoutValidation(string) (AccessTokenResponse, *domain.OAuthError)
 	Refresh(RefreshTokenRequest) (AccessTokenResponse, *domain.OAuthError)
 }
 
@@ -51,24 +50,12 @@ func (s *service) Exchange(req AuthorizationCodeRequest) (AccessTokenResponse, *
 	return accessToken, nil
 }
 
-func (s *service) ExchangeWithoutValidation(signedAuthorizationCode string) (AccessTokenResponse, *domain.OAuthError) {
-	ctx, err := s.contextSigner.VerifyAndDecode(signedAuthorizationCode)
-
-	if err != nil {
-		return AccessTokenResponse{}, domain.InvalidAuthorizationCodeRequestError
-	}
-
-	accessToken, externalErr := s.externalServiceClient.GetAccessToken(ctx)
-	if externalErr != nil {
-		return AccessTokenResponse{}, externalErr
-	}
-
-	return accessToken, nil
-}
-
 func (s *service) Refresh(req RefreshTokenRequest) (AccessTokenResponse, *domain.OAuthError) {
-	client := s.clientService.GetByID(req.ClientID)
+	if req.GrantType != "refresh_token" {
+		return AccessTokenResponse{}, domain.InvalidGrantTypeError
+	}
 
+	client := s.clientService.GetByID(req.ClientID)
 	if err := ValidateClient(req.ClientID, req.ClientSecret, client); err != nil {
 		return AccessTokenResponse{}, err
 	}

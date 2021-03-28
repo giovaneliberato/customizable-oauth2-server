@@ -67,7 +67,6 @@ func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorization
 	return AuthorizationReponse{
 		SignedAuthorizationCode: signedAuthorizationCode,
 		State:                   context.State,
-		ResponseType:            context.ResponseType,
 		RedirectURI:             context.RedirectURI,
 	}, nil
 }
@@ -78,11 +77,10 @@ func (s *service) ExchangeAuthorizationCode(r ExchangeAuthorizationCodeRequest) 
 
 func (s *service) buildAuthorizationContext(req AuthorizationRequest) string {
 	context := Context{
-		ClientID:     req.ClientID,
-		State:        req.State,
-		Scope:        req.Scope,
-		ResponseType: req.ResponseType,
-		RedirectURI:  req.RedirectURI,
+		ClientID:    req.ClientID,
+		State:       req.State,
+		Scope:       req.Scope,
+		RedirectURI: req.RedirectURI,
 	}
 
 	signedContext, _ := s.contextSigner.SignAndEncode(context)
@@ -94,7 +92,6 @@ func (s *service) buildAuthorizationCodeContext(ctx Context, approveAuthorizatio
 		ClientID:          ctx.ClientID,
 		Scope:             ctx.Scope,
 		RedirectURI:       ctx.RedirectURI,
-		ResponseType:      ctx.ResponseType,
 		AuthorizationCode: approveAuthorization.AuthorizationCode,
 	}
 

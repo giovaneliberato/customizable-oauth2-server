@@ -6,7 +6,6 @@ import (
 	"net/url"
 	"oauth2-server/app/domain"
 	"oauth2-server/app/domain/authorization"
-	"oauth2-server/app/domain/token"
 	"oauth2-server/app/routes"
 	"oauth2-server/app/test"
 	"strings"
@@ -117,13 +116,13 @@ func TestAuthoriationRedirectsToApprovalWithMultipleScopes(t *testing.T) {
 
 func TestUnsuccessfulAuthorization(t *testing.T) {
 	var server = test.TestServerFor(routes.AuthorizationRouter)
+	req, _ := http.NewRequest("POST", server.URL+"/oauth2/approve-authorization", nil)
+	req.PostForm = make(url.Values)
+	req.PostForm.Add("approved", "true")
+	req.PostForm.Add("authorization_code", "3CJu2J5Yix8tQw")
+	req.PostForm.Add("signed_context", generateValidSignedContext()+"tampered")
 
-	form := url.Values{}
-	form.Add("approved", "true")
-	form.Add("authorization_code", "3CJu2J5Yix8tQw")
-	form.Add("signed_context", generateValidSignedContext()+"tampered")
-	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
-
+	resp, _ := httpClient().Do(req)
 	var respBody domain.OAuthError
 
 	json.NewDecoder(resp.Body).Decode(&respBody)
@@ -169,35 +168,6 @@ func TestSuccessfulAuthorizationRedirectsClient(t *testing.T) {
 	assert.NotEmpty(t, qs.Get("code"))
 }
 
-func TestAuthoriationResponseTypeToken(t *testing.T) {
-	var server = test.TestServerFor(routes.AuthorizationRouter)
-	signer := authorization.NewContextSigner()
-	context := authorization.Context{
-		ClientID:     test.TestClient.ID,
-		State:        "state",
-		ResponseType: "token",
-		Scope:        []string{"profile"},
-		RedirectURI:  test.TestClient.AllowedRedirectUrls[0],
-	}
-	signedContext, _ := signer.SignAndEncode(context)
-
-	form := url.Values{}
-	form.Add("approved", "true")
-	form.Add("authorization_code", "3CJu2J5Yix8tQw")
-	form.Add("signed_context", signedContext)
-	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
-
-	var respBody token.AccessTokenResponse
-	json.NewDecoder(resp.Body).Decode(&respBody)
-
-	assert.Empty(t, resp.Header.Get("Location"))
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
-	assert.Equal(t, "bearer", respBody.TokenType)
-	assert.NotEmpty(t, respBody.AccessToken)
-	assert.NotEmpty(t, respBody.RefreshToken)
-}
-
 func buildQueryStringWith(overrideKey string, value string) url.Values {
 	q := buildQueryString()
 	q.Set(overrideKey, value)
@@ -226,11 +196,10 @@ func httpClient() *http.Client {
 func generateValidSignedContext() string {
 	signer := authorization.NewContextSigner()
 	Context := authorization.Context{
-		ClientID:     test.TestClient.ID,
-		State:        "state",
-		ResponseType: "code",
-		Scope:        []string{"profile"},
-		RedirectURI:  test.TestClient.AllowedRedirectUrls[0],
+		ClientID:    test.TestClient.ID,
+		State:       "state",
+		Scope:       []string{"profile"},
+		RedirectURI: test.TestClient.AllowedRedirectUrls[0],
 	}
 	signedContext, _ := signer.SignAndEncode(Context)
 	return signedContext
