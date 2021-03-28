@@ -7,6 +7,13 @@ type AuthorizationCodeRequest struct {
 	SignedAuthorizationCode string
 }
 
+type RefreshTokenRequest struct {
+	ClientID     string
+	ClientSecret string
+	GrantType    string
+	RefreshToken string
+}
+
 type AccessTokenResponse struct {
 	AccessToken  string   `json:"access_token"`
 	RefreshToken string   `json:"refresh_token,omitempty"`

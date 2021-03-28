@@ -7,3 +7,4 @@
 - revoke token endpoint
 
 
+you should de responsible for keeping scopes in accesstoken and refresh token

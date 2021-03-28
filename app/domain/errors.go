@@ -44,6 +44,12 @@ var UnsupportedResponseTypeError = &OAuthError{
 	Abort:            false,
 }
 
+var InvalidGrantTypeError = &OAuthError{
+	Err:              "invalid_grant",
+	ErrorDescription: "Invalid grant type for this request",
+	Abort:            false,
+}
+
 var InvalidScopeError = &OAuthError{
 	Err:              "invalid_scope",
 	ErrorDescription: "Requested scopes are not valid",

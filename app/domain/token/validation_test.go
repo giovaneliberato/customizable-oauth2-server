@@ -16,7 +16,7 @@ func TestClientIDDoNotMatch(t *testing.T) {
 		GrantType:    "authorization_code",
 	}
 
-	err := token.ValidateClient(req, test.TestClient)
+	err := token.ValidateClient(req.ClientID, req.ClientSecret, test.TestClient)
 	assert.NotNil(t, err)
 	assert.Equal(t, domain.InvalidClientError, err)
 }
@@ -28,7 +28,7 @@ func TestClientSecretDoNotMatch(t *testing.T) {
 		GrantType:    "authorization_code",
 	}
 
-	err := token.ValidateClient(req, test.TestClient)
+	err := token.ValidateClient(req.ClientID, req.ClientSecret, test.TestClient)
 	assert.NotNil(t, err)
 	assert.Equal(t, domain.InvalidClientError, err)
 }
@@ -40,6 +40,6 @@ func TestClientValidationSuccess(t *testing.T) {
 		GrantType:    "authorization_code",
 	}
 
-	err := token.ValidateClient(req, test.TestClient)
+	err := token.ValidateClient(req.ClientID, req.ClientSecret, test.TestClient)
 	assert.Nil(t, err)
 }

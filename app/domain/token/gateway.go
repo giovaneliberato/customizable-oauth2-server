@@ -9,6 +9,7 @@ import (
 
 type ExternalServiceClient interface {
 	GetAccessToken(authorization.Context) (AccessTokenResponse, *domain.OAuthError)
+	RefreshAccessToken(string) (AccessTokenResponse, *domain.OAuthError)
 }
 
 type externalServiceClient struct {
@@ -25,5 +26,14 @@ func (c *externalServiceClient) GetAccessToken(ctx authorization.Context) (Acces
 		TokenType:    "bearer",
 		ExpiresIn:    36000,
 		Scope:        ctx.Scope,
+	}, nil
+}
+
+func (c *externalServiceClient) RefreshAccessToken(string) (AccessTokenResponse, *domain.OAuthError) {
+	return AccessTokenResponse{
+		AccessToken:  uuid.NewString(),
+		RefreshToken: uuid.NewString(),
+		TokenType:    "bearer",
+		ExpiresIn:    36000,
 	}, nil
 }

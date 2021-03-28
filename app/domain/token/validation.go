@@ -15,12 +15,12 @@ func ValidateContext(req AuthorizationCodeRequest, ctx authorization.Context) *d
 	return nil
 }
 
-func ValidateClient(req AuthorizationCodeRequest, c client.Client) *domain.OAuthError {
-	if c.ID == "" || c.ID != req.ClientID {
+func ValidateClient(reqClientID, recClientSecret string, c client.Client) *domain.OAuthError {
+	if c.ID == "" || c.ID != reqClientID {
 		return domain.InvalidClientError
 	}
 
-	if bytes.Compare([]byte(c.HashedSecret), client.HashSecret(req.ClientSecret)) != 0 {
+	if bytes.Compare([]byte(c.HashedSecret), client.HashSecret(recClientSecret)) != 0 {
 		return domain.InvalidClientError
 	}
 	return nil

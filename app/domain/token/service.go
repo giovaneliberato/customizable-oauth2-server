@@ -8,6 +8,7 @@ import (
 
 type Service interface {
 	Exchange(AuthorizationCodeRequest) (AccessTokenResponse, *domain.OAuthError)
+	Refresh(RefreshTokenRequest) (AccessTokenResponse, *domain.OAuthError)
 }
 
 type service struct {
@@ -37,12 +38,30 @@ func (s *service) Exchange(req AuthorizationCodeRequest) (AccessTokenResponse, *
 
 	client := s.clientService.GetByID(req.ClientID)
 
-	if err := ValidateClient(req, client); err != nil {
+	if err := ValidateClient(req.ClientID, req.ClientSecret, client); err != nil {
 		return AccessTokenResponse{}, err
 	}
 
 	accessToken, externalErr := s.externalServiceClient.GetAccessToken(ctx)
-	if err != nil {
+	if externalErr != nil {
+		return AccessTokenResponse{}, externalErr
+	}
+
+	return accessToken, nil
+}
+
+func (s *service) Refresh(req RefreshTokenRequest) (AccessTokenResponse, *domain.OAuthError) {
+	if req.GrantType != "refresh_token" {
+		return AccessTokenResponse{}, domain.InvalidGrantTypeError
+	}
+
+	client := s.clientService.GetByID(req.ClientID)
+	if err := ValidateClient(req.ClientID, req.ClientSecret, client); err != nil {
+		return AccessTokenResponse{}, err
+	}
+
+	accessToken, externalErr := s.externalServiceClient.RefreshAccessToken(req.RefreshToken)
+	if externalErr != nil {
 		return AccessTokenResponse{}, externalErr
 	}
 
