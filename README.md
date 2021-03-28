@@ -1,6 +1,6 @@
 
 ![](_docs/oauth-logo.png)
-# OAuth2 server for ready for customization. 
+# OAuth2 server - Ready for customization!
 
 This web-service implements a **fully-compliant OAuth2 server** following the [RFC-6749](https://tools.ietf.org/html/rfc6749). It is framework and infrastructure agnostic. 
 
