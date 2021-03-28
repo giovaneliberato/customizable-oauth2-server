@@ -75,7 +75,7 @@ func validate(c Client) error {
 }
 
 func supportedResponseType(grants []string) bool {
-	for _, supportedGrant := range viper.GetStringSlice("oauth2-server.supported-grant-types") {
+	for _, supportedGrant := range viper.GetStringSlice("oauth2-server.allowed-response-types") {
 		for _, grant := range grants {
 			if supportedGrant == grant {
 				return true

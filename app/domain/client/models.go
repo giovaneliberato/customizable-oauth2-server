@@ -6,6 +6,6 @@ type Client struct {
 	RawSecret            string   `json:"secret"`
 	HashedSecret         []byte   `json:"-"`
 	AllowedRedirectUrls  []string `json:"allowed_redirect_urls"`
-	AllowedResponseTypes []string `json:"allowed_grant_types"`
+	AllowedResponseTypes []string `json:"allowed_response_types"`
 	AllowedScopes        []string `json:"allowed_scopes"`
 }

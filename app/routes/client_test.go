@@ -15,11 +15,11 @@ func TestCreateClientError(t *testing.T) {
 	var server = test.TestServerFor(routes.ClienRouter)
 
 	clientData := map[string]interface{}{
-		"id":                    "",
-		"secret":                "secret",
-		"allowed_redirect_urls": []string{"http://test.com/callback"},
-		"allowed_grant_types":   []string{"code"},
-		"allowed_scopes":        []string{"profile"},
+		"id":                     "",
+		"secret":                 "secret",
+		"allowed_redirect_urls":  []string{"http://test.com/callback"},
+		"allowed_response_types": []string{"code"},
+		"allowed_scopes":         []string{"profile"},
 	}
 
 	jsonValue, _ := json.Marshal(clientData)
@@ -34,12 +34,12 @@ func TestCreateClientSuccess(t *testing.T) {
 	var server = test.TestServerFor(routes.ClienRouter)
 
 	clientData := map[string]interface{}{
-		"id":                    "new-test-client",
-		"name":                  "Test Third Part App",
-		"secret":                "secret",
-		"allowed_redirect_urls": []string{"http://test.com/callback"},
-		"allowed_grant_types":   []string{"code"},
-		"allowed_scopes":        []string{"profile"},
+		"id":                     "new-test-client",
+		"name":                   "Test Third Part App",
+		"secret":                 "secret",
+		"allowed_redirect_urls":  []string{"http://test.com/callback"},
+		"allowed_response_types": []string{"code"},
+		"allowed_scopes":         []string{"profile"},
 	}
 
 	jsonValue, _ := json.Marshal(clientData)
