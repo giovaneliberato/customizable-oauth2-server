@@ -54,9 +54,7 @@ func (t *tokenRoutes) exchange(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonBody, _ := json.Marshal(accessToken)
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonBody)
+	renderAccessTokenResponse(w, accessToken)
 }
 
 func (t *tokenRoutes) refresh(w http.ResponseWriter, r *http.Request) {
@@ -68,9 +66,7 @@ func (t *tokenRoutes) refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonBody, _ := json.Marshal(accessToken)
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonBody)
+	renderAccessTokenResponse(w, accessToken)
 }
 
 func (t *tokenRoutes) Revoke(w http.ResponseWriter, r *http.Request) {
@@ -92,4 +88,10 @@ func parseAuthorizationCodeRequest(r *http.Request) token.AuthorizationCodeReque
 		GrantType:               r.FormValue("grant_type"),
 		SignedAuthorizationCode: r.FormValue("code"),
 	}
+}
+
+func renderAccessTokenResponse(w http.ResponseWriter, accessToken token.AccessTokenResponse) {
+	jsonBody, _ := json.Marshal(accessToken)
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonBody)
 }
