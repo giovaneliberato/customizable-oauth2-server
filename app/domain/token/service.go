@@ -7,8 +7,8 @@ import (
 )
 
 type Service interface {
-	Exchange(AuthorizationCodeRequest) (AccessTokenResponse, *domain.OAuthError)
-	Refresh(RefreshTokenRequest) (AccessTokenResponse, *domain.OAuthError)
+	Exchange(AuthorizationCodeRequest) (authorization.AccessTokenResponse, *domain.OAuthError)
+	Refresh(RefreshTokenRequest) (authorization.AccessTokenResponse, *domain.OAuthError)
 }
 
 type service struct {
@@ -25,44 +25,44 @@ func NewService(clientService client.Service, contextSigner authorization.Contex
 	}
 }
 
-func (s *service) Exchange(req AuthorizationCodeRequest) (AccessTokenResponse, *domain.OAuthError) {
+func (s *service) Exchange(req AuthorizationCodeRequest) (authorization.AccessTokenResponse, *domain.OAuthError) {
 	ctx, err := s.contextSigner.VerifyAndDecode(req.SignedAuthorizationCode)
 
 	if err != nil {
-		return AccessTokenResponse{}, domain.InvalidAuthorizationCodeRequestError
+		return authorization.AccessTokenResponse{}, domain.InvalidAuthorizationCodeRequestError
 	}
 
 	if err := ValidateContext(req, ctx); err != nil {
-		return AccessTokenResponse{}, err
+		return authorization.AccessTokenResponse{}, err
 	}
 
 	client := s.clientService.GetByID(req.ClientID)
 
 	if err := ValidateClient(req.ClientID, req.ClientSecret, client); err != nil {
-		return AccessTokenResponse{}, err
+		return authorization.AccessTokenResponse{}, err
 	}
 
 	accessToken, externalErr := s.externalServiceClient.GetAccessToken(ctx)
 	if externalErr != nil {
-		return AccessTokenResponse{}, externalErr
+		return authorization.AccessTokenResponse{}, externalErr
 	}
 
 	return accessToken, nil
 }
 
-func (s *service) Refresh(req RefreshTokenRequest) (AccessTokenResponse, *domain.OAuthError) {
+func (s *service) Refresh(req RefreshTokenRequest) (authorization.AccessTokenResponse, *domain.OAuthError) {
 	if req.GrantType != "refresh_token" {
-		return AccessTokenResponse{}, domain.InvalidGrantTypeError
+		return authorization.AccessTokenResponse{}, domain.InvalidGrantTypeError
 	}
 
 	client := s.clientService.GetByID(req.ClientID)
 	if err := ValidateClient(req.ClientID, req.ClientSecret, client); err != nil {
-		return AccessTokenResponse{}, err
+		return authorization.AccessTokenResponse{}, err
 	}
 
 	accessToken, externalErr := s.externalServiceClient.RefreshAccessToken(req.RefreshToken)
 	if externalErr != nil {
-		return AccessTokenResponse{}, externalErr
+		return authorization.AccessTokenResponse{}, externalErr
 	}
 
 	return accessToken, nil

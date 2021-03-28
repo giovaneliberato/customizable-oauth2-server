@@ -8,8 +8,8 @@ import (
 )
 
 type ExternalServiceClient interface {
-	GetAccessToken(authorization.Context) (AccessTokenResponse, *domain.OAuthError)
-	RefreshAccessToken(string) (AccessTokenResponse, *domain.OAuthError)
+	GetAccessToken(authorization.Context) (authorization.AccessTokenResponse, *domain.OAuthError)
+	RefreshAccessToken(string) (authorization.AccessTokenResponse, *domain.OAuthError)
 }
 
 type externalServiceClient struct {
@@ -19,8 +19,8 @@ func NewExternalServiceClient() ExternalServiceClient {
 	return &externalServiceClient{}
 }
 
-func (c *externalServiceClient) GetAccessToken(ctx authorization.Context) (AccessTokenResponse, *domain.OAuthError) {
-	return AccessTokenResponse{
+func (c *externalServiceClient) GetAccessToken(ctx authorization.Context) (authorization.AccessTokenResponse, *domain.OAuthError) {
+	return authorization.AccessTokenResponse{
 		AccessToken:  uuid.NewString(),
 		RefreshToken: uuid.NewString(),
 		TokenType:    "bearer",
@@ -29,8 +29,8 @@ func (c *externalServiceClient) GetAccessToken(ctx authorization.Context) (Acces
 	}, nil
 }
 
-func (c *externalServiceClient) RefreshAccessToken(string) (AccessTokenResponse, *domain.OAuthError) {
-	return AccessTokenResponse{
+func (c *externalServiceClient) RefreshAccessToken(string) (authorization.AccessTokenResponse, *domain.OAuthError) {
+	return authorization.AccessTokenResponse{
 		AccessToken:  uuid.NewString(),
 		RefreshToken: uuid.NewString(),
 		TokenType:    "bearer",

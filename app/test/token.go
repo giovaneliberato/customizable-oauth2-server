@@ -3,7 +3,6 @@ package test
 import (
 	"oauth2-server/app/domain"
 	"oauth2-server/app/domain/authorization"
-	"oauth2-server/app/domain/token"
 
 	"github.com/google/uuid"
 )
@@ -12,11 +11,11 @@ type ExternalServiceClientMock struct {
 	ReturnError bool
 }
 
-func (c *ExternalServiceClientMock) GetAccessToken(ctx authorization.Context) (token.AccessTokenResponse, *domain.OAuthError) {
+func (c *ExternalServiceClientMock) GetAccessToken(ctx authorization.Context) (authorization.AccessTokenResponse, *domain.OAuthError) {
 	if c.ReturnError {
-		return token.AccessTokenResponse{}, &domain.OAuthError{}
+		return authorization.AccessTokenResponse{}, &domain.OAuthError{}
 	}
-	return token.AccessTokenResponse{
+	return authorization.AccessTokenResponse{
 		AccessToken:  uuid.NewString(),
 		RefreshToken: uuid.NewString(),
 		TokenType:    "bearer",
@@ -25,11 +24,11 @@ func (c *ExternalServiceClientMock) GetAccessToken(ctx authorization.Context) (t
 	}, nil
 }
 
-func (c *ExternalServiceClientMock) RefreshAccessToken(refreshToken string) (token.AccessTokenResponse, *domain.OAuthError) {
+func (c *ExternalServiceClientMock) RefreshAccessToken(refreshToken string) (authorization.AccessTokenResponse, *domain.OAuthError) {
 	if c.ReturnError {
-		return token.AccessTokenResponse{}, &domain.OAuthError{}
+		return authorization.AccessTokenResponse{}, &domain.OAuthError{}
 	}
-	return token.AccessTokenResponse{
+	return authorization.AccessTokenResponse{
 		AccessToken:  uuid.NewString(),
 		RefreshToken: uuid.NewString(),
 		TokenType:    "bearer",

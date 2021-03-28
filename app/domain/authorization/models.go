@@ -25,7 +25,16 @@ type AuthozirationContext struct {
 type AuthorizationReponse struct {
 	RedirectURI             string
 	State                   string
+	AccessToken             AccessTokenResponse
 	SignedAuthorizationCode string
+}
+
+type AccessTokenResponse struct {
+	AccessToken  string   `json:"access_token"`
+	RefreshToken string   `json:"refresh_token,omitempty"`
+	TokenType    string   `json:"token_type"`
+	ExpiresIn    int      `json:"expires_in"`
+	Scope        []string `json:"scope,omitempty"`
 }
 
 type ExchangeAuthorizationCodeRequest struct {
