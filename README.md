@@ -21,7 +21,7 @@ If you need to provide OAuth2 authentication but already have your authenticatio
 
 __________________________
 [![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](http://golang.org) [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE) [![Go Report Card](https://goreportcard.com/badge/github.com/giovaneliberato/your-oauth2-server-here)](https://goreportcard.com/report/github.com/giovaneliberato/your-oauth2-server-here)
-__________________________
+
 
 **Note:** This is not a library. There might be breaking changes in the future as the protocol evolves. Consider this project a scaffold for your own implementation.
 
