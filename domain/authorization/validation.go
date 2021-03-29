@@ -5,20 +5,20 @@ import (
 	"oauth2-server/domain/client"
 )
 
-func Validate(client client.Client, data AuthorizationRequest) *domain.OAuthError {
-	if client.ID == "" || client.ID != data.ClientID {
+func Validate(client client.Client, auth Authorization) *domain.OAuthError {
+	if client.ID == "" || client.ID != auth.ClientID {
 		return domain.InvalidClientError
 	}
 
-	if notIn(data.RedirectURI, client.AllowedRedirectUrls) {
+	if notIn(auth.RedirectURI, client.AllowedRedirectUrls) {
 		return domain.InvalidClientError
 	}
 
-	if notIn(data.ResponseType, client.AllowedResponseTypes) {
+	if notIn(auth.ResponseType, client.AllowedResponseTypes) {
 		return domain.UnsupportedResponseTypeError
 	}
 
-	if oneItemNotIn(data.Scope, client.AllowedScopes) {
+	if oneItemNotIn(auth.Scope, client.AllowedScopes) {
 		return domain.InvalidScopeError
 	}
 

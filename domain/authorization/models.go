@@ -1,6 +1,6 @@
 package authorization
 
-type AuthorizationRequest struct {
+type Authorization struct {
 	ClientID     string
 	ResponseType string
 	RedirectURI  string
@@ -8,7 +8,7 @@ type AuthorizationRequest struct {
 	State        string
 }
 
-type ApproveAuthorizationRequest struct {
+type AuthorizationApproval struct {
 	ApprovedByUser             bool
 	AuthorizationCode          string
 	SignedAuthorizationRequest string
@@ -37,7 +37,7 @@ type AccessTokenResponse struct {
 	Scope        []string `json:"scope,omitempty"`
 }
 
-type ExchangeAuthorizationCodeRequest struct {
+type AuthorizationCodeExchange struct {
 	ClientID                string
 	ClientSecret            string
 	ResponseType            string

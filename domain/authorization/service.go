@@ -8,9 +8,9 @@ import (
 )
 
 type Service interface {
-	Authorize(AuthorizationRequest) (AuthozirationContext, *domain.OAuthError)
-	ApproveAuthorization(ApproveAuthorizationRequest) (AuthorizationReponse, *domain.OAuthError)
-	ExchangeAuthorizationCode(ExchangeAuthorizationCodeRequest) (AuthorizationReponse, *domain.OAuthError)
+	Authorize(Authorization) (AuthozirationContext, *domain.OAuthError)
+	ApproveAuthorization(AuthorizationApproval) (AuthorizationReponse, *domain.OAuthError)
+	ExchangeAuthorizationCode(AuthorizationCodeExchange) (AuthorizationReponse, *domain.OAuthError)
 }
 
 type service struct {
@@ -27,10 +27,10 @@ func NewService(client client.Service, signer ContextSigner) Service {
 	}
 }
 
-func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext, *domain.OAuthError) {
-	client := s.client.GetByID(request.ClientID)
+func (s *service) Authorize(auth Authorization) (AuthozirationContext, *domain.OAuthError) {
+	client := s.client.GetByID(auth.ClientID)
 
-	err := Validate(client, request)
+	err := Validate(client, auth)
 	if err != nil {
 		return AuthozirationContext{}, err
 	}
@@ -39,21 +39,21 @@ func (s *service) Authorize(request AuthorizationRequest) (AuthozirationContext,
 		AuthorizationURL:           s.authorizationURL,
 		ClientID:                   client.ID,
 		ClientName:                 client.Name,
-		RequestedScopes:            request.Scope,
-		SignedAuthorizationContext: s.buildAuthorizationContext(request),
+		RequestedScopes:            auth.Scope,
+		SignedAuthorizationContext: s.buildAuthorizationContext(auth),
 	}
 
 	return ctx, nil
 }
 
-func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorizationRequest) (AuthorizationReponse, *domain.OAuthError) {
-	context, err := s.contextSigner.VerifyAndDecode(approveAuthorization.SignedAuthorizationRequest)
+func (s *service) ApproveAuthorization(approval AuthorizationApproval) (AuthorizationReponse, *domain.OAuthError) {
+	context, err := s.contextSigner.VerifyAndDecode(approval.SignedAuthorizationRequest)
 
 	if err != nil {
 		return AuthorizationReponse{}, domain.InvalidApproveAuthorizationError
 	}
 
-	if !approveAuthorization.ApprovedByUser {
+	if !approval.ApprovedByUser {
 		resp := AuthorizationReponse{
 			RedirectURI: context.RedirectURI,
 			State:       context.State,
@@ -62,7 +62,7 @@ func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorization
 		return resp, domain.AccessDeniedError
 	}
 
-	signedAuthorizationCode := s.buildAuthorizationCodeContext(context, approveAuthorization)
+	signedAuthorizationCode := s.buildAuthorizationCodeContext(context, approval)
 
 	return AuthorizationReponse{
 		SignedAuthorizationCode: signedAuthorizationCode,
@@ -71,28 +71,28 @@ func (s *service) ApproveAuthorization(approveAuthorization ApproveAuthorization
 	}, nil
 }
 
-func (s *service) ExchangeAuthorizationCode(r ExchangeAuthorizationCodeRequest) (AuthorizationReponse, *domain.OAuthError) {
+func (s *service) ExchangeAuthorizationCode(r AuthorizationCodeExchange) (AuthorizationReponse, *domain.OAuthError) {
 	return AuthorizationReponse{}, nil
 }
 
-func (s *service) buildAuthorizationContext(req AuthorizationRequest) string {
+func (s *service) buildAuthorizationContext(auth Authorization) string {
 	context := Context{
-		ClientID:    req.ClientID,
-		State:       req.State,
-		Scope:       req.Scope,
-		RedirectURI: req.RedirectURI,
+		ClientID:    auth.ClientID,
+		State:       auth.State,
+		Scope:       auth.Scope,
+		RedirectURI: auth.RedirectURI,
 	}
 
 	signedContext, _ := s.contextSigner.SignAndEncode(context)
 	return signedContext
 }
 
-func (s *service) buildAuthorizationCodeContext(ctx Context, approveAuthorization ApproveAuthorizationRequest) string {
+func (s *service) buildAuthorizationCodeContext(ctx Context, approval AuthorizationApproval) string {
 	context := Context{
 		ClientID:          ctx.ClientID,
 		Scope:             ctx.Scope,
 		RedirectURI:       ctx.RedirectURI,
-		AuthorizationCode: approveAuthorization.AuthorizationCode,
+		AuthorizationCode: approval.AuthorizationCode,
 	}
 
 	signedContext, _ := s.contextSigner.SignAndEncode(context)

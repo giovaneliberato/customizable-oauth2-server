@@ -17,7 +17,7 @@ func TestNotBuildAuthorizationContextIfValidationFails(t *testing.T) {
 
 	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
 
-	ctx, err := service.Authorize(authorization.AuthorizationRequest{})
+	ctx, err := service.Authorize(authorization.Authorization{})
 
 	assert.NotNil(t, err)
 	assert.Empty(t, ctx)
@@ -30,7 +30,7 @@ func TestBuildAuthorizationContext(t *testing.T) {
 
 	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
 
-	req := authorization.AuthorizationRequest{
+	auth := authorization.Authorization{
 		ClientID:     test.TestClient.ID,
 		RedirectURI:  test.TestClient.AllowedRedirectUrls[0],
 		ResponseType: "code",
@@ -38,12 +38,12 @@ func TestBuildAuthorizationContext(t *testing.T) {
 		Scope:        []string{"profile"},
 	}
 
-	ctx, err := service.Authorize(req)
+	ctx, err := service.Authorize(auth)
 
 	assert.Nil(t, err)
-	assert.Equal(t, req.ClientID, ctx.ClientID)
+	assert.Equal(t, auth.ClientID, ctx.ClientID)
 	assert.Equal(t, ctx.ClientName, test.TestClient.Name)
-	assert.Equal(t, req.Scope, ctx.RequestedScopes)
+	assert.Equal(t, auth.Scope, ctx.RequestedScopes)
 	assert.Equal(t, viper.GetString("authorization.consent-url"), ctx.AuthorizationURL)
 	assert.NotEmpty(t, ctx.SignedAuthorizationContext)
 }
@@ -54,15 +54,15 @@ func TestRejectApproveAuthorizationIfSignatureIsInvalid(t *testing.T) {
 	clientServiceMock.Return = test.TestClient
 	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
 
-	ctx, _ := service.Authorize(buildAuthorizationRequest())
+	ctx, _ := service.Authorize(buildAuthorization())
 
-	approveReq := authorization.ApproveAuthorizationRequest{
+	approval := authorization.AuthorizationApproval{
 		ApprovedByUser:             true,
 		AuthorizationCode:          "authorization-code",
 		SignedAuthorizationRequest: ctx.SignedAuthorizationContext + "tampered",
 	}
 
-	_, err := service.ApproveAuthorization(approveReq)
+	_, err := service.ApproveAuthorization(approval)
 	assert.NotNil(t, err)
 	assert.True(t, err.Abort)
 	assert.Equal(t, "invalid_request", err.Err)
@@ -74,21 +74,21 @@ func TestDeniedAuthorization(t *testing.T) {
 	clientServiceMock.Return = test.TestClient
 	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
 
-	req := buildAuthorizationRequest()
-	ctx, _ := service.Authorize(req)
+	auth := buildAuthorization()
+	ctx, _ := service.Authorize(auth)
 
-	approveReq := authorization.ApproveAuthorizationRequest{
+	approval := authorization.AuthorizationApproval{
 		ApprovedByUser:             false,
 		AuthorizationCode:          "authorization-code",
 		SignedAuthorizationRequest: ctx.SignedAuthorizationContext,
 	}
 
-	resp, err := service.ApproveAuthorization(approveReq)
+	resp, err := service.ApproveAuthorization(approval)
 	assert.NotNil(t, err)
 	assert.False(t, err.Abort)
 	assert.Equal(t, "access_denied", err.Err)
-	assert.Equal(t, req.RedirectURI, resp.RedirectURI)
-	assert.Equal(t, req.State, resp.State)
+	assert.Equal(t, auth.RedirectURI, resp.RedirectURI)
+	assert.Equal(t, auth.State, resp.State)
 	assert.Empty(t, resp.SignedAuthorizationCode)
 }
 
@@ -99,29 +99,29 @@ func TestSuccessfulAuthorization(t *testing.T) {
 	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
 	authorizationSigner := authorization.NewContextSigner()
 
-	req := buildAuthorizationRequest()
-	ctx, _ := service.Authorize(req)
+	auth := buildAuthorization()
+	ctx, _ := service.Authorize(auth)
 
-	approveReq := authorization.ApproveAuthorizationRequest{
+	approval := authorization.AuthorizationApproval{
 		ApprovedByUser:             true,
 		AuthorizationCode:          "authorization-code",
 		SignedAuthorizationRequest: ctx.SignedAuthorizationContext,
 	}
 
-	resp, err := service.ApproveAuthorization(approveReq)
+	resp, err := service.ApproveAuthorization(approval)
 	assert.Nil(t, err)
-	assert.Equal(t, req.RedirectURI, resp.RedirectURI)
-	assert.Equal(t, req.State, resp.State)
+	assert.Equal(t, auth.RedirectURI, resp.RedirectURI)
+	assert.Equal(t, auth.State, resp.State)
 
 	Context, _ := authorizationSigner.VerifyAndDecode(resp.SignedAuthorizationCode)
-	assert.Equal(t, approveReq.AuthorizationCode, Context.AuthorizationCode)
-	assert.Equal(t, req.RedirectURI, Context.RedirectURI)
+	assert.Equal(t, approval.AuthorizationCode, Context.AuthorizationCode)
+	assert.Equal(t, auth.RedirectURI, Context.RedirectURI)
 	assert.Equal(t, test.TestClient.ID, Context.ClientID)
-	assert.Equal(t, req.Scope, Context.Scope)
+	assert.Equal(t, auth.Scope, Context.Scope)
 }
 
-func buildAuthorizationRequest() authorization.AuthorizationRequest {
-	return authorization.AuthorizationRequest{
+func buildAuthorization() authorization.Authorization {
+	return authorization.Authorization{
 		ClientID:     test.TestClient.ID,
 		RedirectURI:  test.TestClient.AllowedRedirectUrls[0],
 		ResponseType: test.TestClient.AllowedResponseTypes[0],

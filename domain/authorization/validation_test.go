@@ -10,11 +10,11 @@ import (
 )
 
 func TestInvalidClient(t *testing.T) {
-	req := authorization.AuthorizationRequest{
+	auth := authorization.Authorization{
 		ClientID: "some-client",
 	}
 
-	err := authorization.Validate(client.Client{}, req)
+	err := authorization.Validate(client.Client{}, auth)
 	assert.NotNil(t, err)
 	assert.False(t, err.Empty())
 	assert.True(t, err.Abort)
@@ -24,11 +24,11 @@ func TestInvalidClient(t *testing.T) {
 
 func TestInvalidClientID(t *testing.T) {
 	client := test.TestClient
-	req := authorization.AuthorizationRequest{
+	auth := authorization.Authorization{
 		ClientID: "non-existent-client",
 	}
 
-	err := authorization.Validate(client, req)
+	err := authorization.Validate(client, auth)
 	assert.NotNil(t, err)
 	assert.False(t, err.Empty())
 	assert.True(t, err.Abort)
@@ -38,12 +38,12 @@ func TestInvalidClientID(t *testing.T) {
 
 func TestRedirectUrl(t *testing.T) {
 	client := test.TestClient
-	req := authorization.AuthorizationRequest{
+	auth := authorization.Authorization{
 		ClientID:    "test-id",
 		RedirectURI: "https://malicious.domain/oauth-callback",
 	}
 
-	err := authorization.Validate(client, req)
+	err := authorization.Validate(client, auth)
 	assert.NotNil(t, err)
 	assert.False(t, err.Empty())
 	assert.True(t, err.Abort)
@@ -53,13 +53,13 @@ func TestRedirectUrl(t *testing.T) {
 
 func TestUnsupportedResponseType(t *testing.T) {
 	client := test.TestClient
-	req := authorization.AuthorizationRequest{
+	auth := authorization.Authorization{
 		ClientID:     client.ID,
 		RedirectURI:  client.AllowedRedirectUrls[0],
 		ResponseType: "implicit",
 	}
 
-	err := authorization.Validate(client, req)
+	err := authorization.Validate(client, auth)
 	assert.NotNil(t, err)
 	assert.False(t, err.Empty())
 	assert.False(t, err.Abort)
@@ -69,14 +69,14 @@ func TestUnsupportedResponseType(t *testing.T) {
 
 func TestUnsupportedScopeNoneMatch(t *testing.T) {
 	client := test.TestClient
-	req := authorization.AuthorizationRequest{
+	auth := authorization.Authorization{
 		ClientID:     client.ID,
 		RedirectURI:  client.AllowedRedirectUrls[0],
 		ResponseType: "code",
 		Scope:        []string{"admin-password"},
 	}
 
-	err := authorization.Validate(client, req)
+	err := authorization.Validate(client, auth)
 	assert.NotNil(t, err)
 	assert.False(t, err.Empty())
 	assert.False(t, err.Abort)
@@ -86,14 +86,14 @@ func TestUnsupportedScopeNoneMatch(t *testing.T) {
 
 func TestUnsupportedScopeOneMatch(t *testing.T) {
 	client := test.TestClient
-	req := authorization.AuthorizationRequest{
+	auth := authorization.Authorization{
 		ClientID:     "test-id",
 		RedirectURI:  "https://test.client/oauth2-callback",
 		ResponseType: "code",
 		Scope:        []string{"profile", "admin-password"},
 	}
 
-	err := authorization.Validate(client, req)
+	err := authorization.Validate(client, auth)
 	assert.NotNil(t, err)
 	assert.False(t, err.Empty())
 	assert.False(t, err.Abort)
@@ -103,39 +103,39 @@ func TestUnsupportedScopeOneMatch(t *testing.T) {
 
 func TestSupportedScopeOneMatch(t *testing.T) {
 	client := test.TestClient
-	req := authorization.AuthorizationRequest{
+	auth := authorization.Authorization{
 		ClientID:     client.ID,
 		RedirectURI:  client.AllowedRedirectUrls[0],
 		ResponseType: "code",
 		Scope:        []string{"profile"},
 	}
 
-	err := authorization.Validate(client, req)
+	err := authorization.Validate(client, auth)
 	assert.Nil(t, err)
 }
 
 func TestSupportedScopeTwoMatch(t *testing.T) {
 	client := test.TestClient
-	req := authorization.AuthorizationRequest{
+	auth := authorization.Authorization{
 		ClientID:     client.ID,
 		RedirectURI:  client.AllowedRedirectUrls[0],
 		ResponseType: "code",
 		Scope:        []string{"profile", "messages"},
 	}
 
-	err := authorization.Validate(client, req)
+	err := authorization.Validate(client, auth)
 	assert.Nil(t, err)
 }
 
 func TestSupportedScopeAllMatch(t *testing.T) {
 	client := test.TestClient
-	req := authorization.AuthorizationRequest{
+	auth := authorization.Authorization{
 		ClientID:     client.ID,
 		RedirectURI:  client.AllowedRedirectUrls[0],
 		ResponseType: "code",
 		Scope:        []string{"profile", "contacts", "messages"},
 	}
 
-	err := authorization.Validate(client, req)
+	err := authorization.Validate(client, auth)
 	assert.Nil(t, err)
 }
