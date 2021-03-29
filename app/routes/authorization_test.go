@@ -14,6 +14,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestInvalidRequest(t *testing.T) {
+	var server = test.TestServerFor(routes.AuthorizationRouter)
+	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
+	req.URL.RawQuery = buildQueryStringWith("client_id", "").Encode()
+
+	resp, _ := httpClient().Do(req)
+	var respBody domain.OAuthError
+	json.NewDecoder(resp.Body).Decode(&respBody)
+
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	assert.Empty(t, resp.Header.Get("Location"))
+	assert.Equal(t, "invalid_request", respBody.Err)
+}
+
 func TestInvalidClientID(t *testing.T) {
 	var server = test.TestServerFor(routes.AuthorizationRouter)
 	req, _ := http.NewRequest("GET", server.URL+"/oauth2/authorize", nil)
@@ -116,15 +130,13 @@ func TestAuthoriationRedirectsToApprovalWithMultipleScopes(t *testing.T) {
 
 func TestUnsuccessfulAuthorization(t *testing.T) {
 	var server = test.TestServerFor(routes.AuthorizationRouter)
-	req, _ := http.NewRequest("POST", server.URL+"/oauth2/approve-authorization", nil)
-	req.PostForm = make(url.Values)
-	req.PostForm.Add("approved", "true")
-	req.PostForm.Add("authorization_code", "3CJu2J5Yix8tQw")
-	req.PostForm.Add("signed_context", generateValidSignedContext()+"tampered")
+	form := url.Values{}
+	form.Add("approved", "true")
+	form.Add("authorization_code", "3CJu2J5Yix8tQw")
+	form.Add("signed_context", generateValidSignedContext()+"tampered")
 
-	resp, _ := httpClient().Do(req)
+	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
 	var respBody domain.OAuthError
-
 	json.NewDecoder(resp.Body).Decode(&respBody)
 
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
@@ -148,6 +160,19 @@ func TestUnnaprovedAuthorization(t *testing.T) {
 	assert.Equal(t, http.StatusFound, resp.StatusCode)
 	assert.Equal(t, "access_denied", qs.Get("error"))
 	assert.Equal(t, "state", qs.Get("state"))
+}
+
+func TestApproveAuthorizationInvalidRequest(t *testing.T) {
+	var server = test.TestServerFor(routes.AuthorizationRouter)
+	form := url.Values{}
+	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
+
+	var respBody domain.OAuthError
+	json.NewDecoder(resp.Body).Decode(&respBody)
+
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	assert.Empty(t, resp.Header.Get("Location"))
+	assert.Equal(t, "invalid_request", respBody.Err)
 }
 
 func TestSuccessfulAuthorizationRedirectsClient(t *testing.T) {

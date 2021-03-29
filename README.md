@@ -11,9 +11,13 @@ If you need to provide OAuth2 authentication but already have your authenticatio
 **This project implements everything** related to client managent, request validation, redirects and errors and **you are only required to integrate a couple of layers** to make it ready to production! 
 
 
+<<<<<<< HEAD
 
 [![try-it](https://img.shields.io/badge/See%20it%20in%20Action!--blue)](http://golang.org)
 
+=======
+[![try-it](https://img.shields.io/badge/See it in-Action!-blue)](http://golang.org)
+>>>>>>> fc756c5 (Extract routes parsing and validation)
 
 
 

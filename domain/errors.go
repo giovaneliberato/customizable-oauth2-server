@@ -26,6 +26,12 @@ var InvalidApproveAuthorizationError = &OAuthError{
 	Abort:            true,
 }
 
+var InvalidRequestError = &OAuthError{
+	Err:              "invalid_request",
+	ErrorDescription: "Invalid request",
+	Abort:            true,
+}
+
 var AccessDeniedError = &OAuthError{
 	Err:              "access_denied",
 	ErrorDescription: "The user or the authorization server denied the request",

@@ -46,9 +46,13 @@ func (t *tokenRoutes) ExchangeOrRefresh(w http.ResponseWriter, r *http.Request) 
 }
 
 func (t *tokenRoutes) exchange(w http.ResponseWriter, r *http.Request) {
-	authCodeRequest := parseAuthorizationCodeRequest(r)
-	accessToken, err := t.service.Exchange(authCodeRequest)
+	authCodeRequest, err := parseAuthorizationCodeRequest(r)
+	if err != nil {
+		renderErrorWithStatus(w, r, err, http.StatusBadRequest)
+		return
+	}
 
+	accessToken, err := t.service.Exchange(authCodeRequest)
 	if err != nil {
 		renderErrorWithStatus(w, r, err, http.StatusBadRequest)
 		return
@@ -60,9 +64,13 @@ func (t *tokenRoutes) exchange(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *tokenRoutes) refresh(w http.ResponseWriter, r *http.Request) {
-	refreshTokenRequest := parseRefreshTokenRequest(r)
-	accessToken, err := t.service.Refresh(refreshTokenRequest)
+	refreshTokenRequest, err := parseRefreshTokenRequest(r)
+	if err != nil {
+		renderErrorWithStatus(w, r, err, http.StatusBadRequest)
+		return
+	}
 
+	accessToken, err := t.service.Refresh(refreshTokenRequest)
 	if err != nil {
 		renderErrorWithStatus(w, r, err, http.StatusBadRequest)
 		return
@@ -71,25 +79,4 @@ func (t *tokenRoutes) refresh(w http.ResponseWriter, r *http.Request) {
 	jsonBody, _ := json.Marshal(accessToken)
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonBody)
-}
-
-func (t *tokenRoutes) Revoke(w http.ResponseWriter, r *http.Request) {
-}
-
-func parseRefreshTokenRequest(r *http.Request) token.RefreshTokenRequest {
-	return token.RefreshTokenRequest{
-		ClientID:     r.FormValue("client_id"),
-		ClientSecret: r.FormValue("client_secret"),
-		GrantType:    r.FormValue("grant_type"),
-		RefreshToken: r.FormValue("refresh_token"),
-	}
-}
-
-func parseAuthorizationCodeRequest(r *http.Request) token.AuthorizationCodeRequest {
-	return token.AuthorizationCodeRequest{
-		ClientID:                r.FormValue("client_id"),
-		ClientSecret:            r.FormValue("client_secret"),
-		GrantType:               r.FormValue("grant_type"),
-		SignedAuthorizationCode: r.FormValue("code"),
-	}
 }

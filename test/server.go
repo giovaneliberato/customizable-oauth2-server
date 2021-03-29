@@ -14,7 +14,7 @@ import (
 )
 
 func LoadConfig() {
-	viper.AddConfigPath(rootDir())
+	viper.AddConfigPath(rootDir() + "/test")
 	viper.SetConfigName("config_test")
 	viper.SetConfigType("yaml")
 
