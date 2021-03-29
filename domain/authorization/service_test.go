@@ -2,8 +2,8 @@ package authorization_test
 
 import (
 	"oauth2-server/domain/authorization"
-	"oauth2-server/domain/client"
 	"oauth2-server/domain/context"
+	"oauth2-server/domain/token"
 	"oauth2-server/test"
 	"testing"
 
@@ -13,10 +13,7 @@ import (
 
 func TestNotBuildAuthorizationContextIfValidationFails(t *testing.T) {
 	test.LoadConfig()
-	clientServiceMock := new(test.ClientServiceMock)
-	clientServiceMock.Return = client.Client{}
-
-	service := authorization.NewService(clientServiceMock, context.NewContextSigner())
+	service := buildTestService()
 
 	ctx, err := service.Authorize(authorization.Authorization{})
 
@@ -26,10 +23,8 @@ func TestNotBuildAuthorizationContextIfValidationFails(t *testing.T) {
 
 func TestBuildAuthorizationContext(t *testing.T) {
 	test.LoadConfig()
-	clientServiceMock := new(test.ClientServiceMock)
-	clientServiceMock.Return = test.TestClient
 
-	service := authorization.NewService(clientServiceMock, context.NewContextSigner())
+	service := buildTestService()
 
 	auth := authorization.Authorization{
 		ClientID:     test.TestClient.ID,
@@ -51,9 +46,7 @@ func TestBuildAuthorizationContext(t *testing.T) {
 
 func TestRejectApproveAuthorizationIfSignatureIsInvalid(t *testing.T) {
 	test.LoadConfig()
-	clientServiceMock := new(test.ClientServiceMock)
-	clientServiceMock.Return = test.TestClient
-	service := authorization.NewService(clientServiceMock, context.NewContextSigner())
+	service := buildTestService()
 
 	ctx, _ := service.Authorize(buildAuthorization())
 
@@ -71,9 +64,7 @@ func TestRejectApproveAuthorizationIfSignatureIsInvalid(t *testing.T) {
 
 func TestDeniedAuthorization(t *testing.T) {
 	test.LoadConfig()
-	clientServiceMock := new(test.ClientServiceMock)
-	clientServiceMock.Return = test.TestClient
-	service := authorization.NewService(clientServiceMock, context.NewContextSigner())
+	service := buildTestService()
 
 	auth := buildAuthorization()
 	ctx, _ := service.Authorize(auth)
@@ -95,9 +86,7 @@ func TestDeniedAuthorization(t *testing.T) {
 
 func TestSuccessfulAuthorization(t *testing.T) {
 	test.LoadConfig()
-	clientServiceMock := new(test.ClientServiceMock)
-	clientServiceMock.Return = test.TestClient
-	service := authorization.NewService(clientServiceMock, context.NewContextSigner())
+	service := buildTestService()
 	authorizationSigner := context.NewContextSigner()
 
 	auth := buildAuthorization()
@@ -119,6 +108,16 @@ func TestSuccessfulAuthorization(t *testing.T) {
 	assert.Equal(t, auth.RedirectURI, Context.RedirectURI)
 	assert.Equal(t, test.TestClient.ID, Context.ClientID)
 	assert.Equal(t, auth.Scope, Context.Scope)
+}
+
+func buildTestService() authorization.Service {
+	clientServiceMock := new(test.ClientServiceMock)
+	clientServiceMock.Return = test.TestClient
+	contextSigner := context.NewContextSigner()
+
+	tokenService := token.NewService(clientServiceMock, contextSigner, &test.ExternalServiceClientMock{})
+
+	return authorization.NewService(clientServiceMock, contextSigner, tokenService)
 }
 
 func buildAuthorization() authorization.Authorization {

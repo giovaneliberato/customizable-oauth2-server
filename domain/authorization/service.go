@@ -4,6 +4,7 @@ import (
 	"oauth2-server/domain"
 	"oauth2-server/domain/client"
 	"oauth2-server/domain/context"
+	"oauth2-server/domain/token"
 
 	"github.com/spf13/viper"
 )
@@ -15,21 +16,23 @@ type Service interface {
 }
 
 type service struct {
-	client           client.Service
+	clientService    client.Service
 	contextSigner    context.Signer
+	tokenService     token.Service
 	authorizationURL string
 }
 
-func NewService(client client.Service, signer context.Signer) Service {
+func NewService(clientService client.Service, signer context.Signer, tokenService token.Service) Service {
 	return &service{
-		client:           client,
+		clientService:    clientService,
+		tokenService:     tokenService,
 		contextSigner:    signer,
 		authorizationURL: viper.GetString("authorization.consent-url"),
 	}
 }
 
 func (s *service) Authorize(auth Authorization) (AuthozirationContext, *domain.OAuthError) {
-	client := s.client.GetByID(auth.ClientID)
+	client := s.clientService.GetByID(auth.ClientID)
 
 	err := Validate(client, auth)
 	if err != nil {
