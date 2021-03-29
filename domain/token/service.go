@@ -4,6 +4,7 @@ import (
 	"oauth2-server/domain"
 	"oauth2-server/domain/authorization"
 	"oauth2-server/domain/client"
+	"oauth2-server/domain/context"
 	"oauth2-server/infra"
 )
 
@@ -15,10 +16,10 @@ type Service interface {
 type service struct {
 	clientService         client.Service
 	externalServiceClient infra.ExternalServiceClient
-	contextSigner         authorization.ContextSigner
+	contextSigner         context.Signer
 }
 
-func NewService(clientService client.Service, contextSigner authorization.ContextSigner, externalServiceClient infra.ExternalServiceClient) Service {
+func NewService(clientService client.Service, contextSigner context.Signer, externalServiceClient infra.ExternalServiceClient) Service {
 	return &service{
 		clientService:         clientService,
 		contextSigner:         contextSigner,

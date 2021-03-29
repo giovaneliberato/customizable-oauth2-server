@@ -7,6 +7,7 @@ import (
 	"oauth2-server/app/routes"
 	"oauth2-server/domain"
 	"oauth2-server/domain/authorization"
+	"oauth2-server/domain/context"
 	"oauth2-server/test"
 	"testing"
 
@@ -36,7 +37,7 @@ func TestAccessTokenExchangeInvalidRequest(t *testing.T) {
 func TestAccessTokenExchangeFailure(t *testing.T) {
 	var server = test.TestServerFor(routes.TokenRouter)
 
-	ctx := authorization.Context{
+	ctx := context.Context{
 		ClientID:          test.TestClient.ID,
 		ResponseType:      "code",
 		Scope:             test.TestClient.AllowedScopes,
@@ -64,7 +65,7 @@ func TestAccessTokenExchangeFailure(t *testing.T) {
 func TestAccessTokenExchangeSuccess(t *testing.T) {
 	var server = test.TestServerFor(routes.TokenRouter)
 
-	ctx := authorization.Context{
+	ctx := context.Context{
 		ClientID:          test.TestClient.ID,
 		ResponseType:      "code",
 		Scope:             test.TestClient.AllowedScopes,
@@ -183,8 +184,8 @@ func TestRefreshAccessTokenExchangeWrongClientSecret(t *testing.T) {
 	assert.NotEmpty(t, respBody.Err)
 }
 
-func getContextSigner() authorization.ContextSigner {
-	var contextSigner authorization.ContextSigner
+func getContextSigner() context.Signer {
+	var contextSigner context.Signer
 	container.Make(&contextSigner)
 	return contextSigner
 }

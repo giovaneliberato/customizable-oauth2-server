@@ -1,7 +1,7 @@
 package token_test
 
 import (
-	"oauth2-server/domain/authorization"
+	"oauth2-server/domain/context"
 	"oauth2-server/domain/token"
 	"oauth2-server/test"
 	"testing"
@@ -14,7 +14,7 @@ func TestInvalidSignedAuthorizationCode(t *testing.T) {
 	contextSigner := getContextSigner()
 	service := buildTestService()
 
-	ctx := authorization.Context{
+	ctx := context.Context{
 		ClientID:          test.TestClient.ID,
 		Scope:             test.TestClient.AllowedScopes,
 		RedirectURI:       test.TestClient.AllowedRedirectUrls[0],
@@ -40,7 +40,7 @@ func TestInvalidClient(t *testing.T) {
 	contextSigner := getContextSigner()
 	service := buildTestService()
 
-	ctx := authorization.Context{
+	ctx := context.Context{
 		ClientID:          test.TestClient.ID,
 		ResponseType:      "code",
 		Scope:             test.TestClient.AllowedScopes,
@@ -72,7 +72,7 @@ func TestInvalidExternalError(t *testing.T) {
 			ReturnError: true,
 		})
 
-	ctx := authorization.Context{
+	ctx := context.Context{
 		ClientID:          test.TestClient.ID,
 		ResponseType:      "code",
 		Scope:             test.TestClient.AllowedScopes,
@@ -99,7 +99,7 @@ func TestExchangeSuccess(t *testing.T) {
 	contextSigner := getContextSigner()
 	service := buildTestService()
 
-	ctx := authorization.Context{
+	ctx := context.Context{
 		ClientID:          test.TestClient.ID,
 		ResponseType:      "code",
 		Scope:             test.TestClient.AllowedScopes,
@@ -124,10 +124,10 @@ func TestExchangeSuccess(t *testing.T) {
 	assert.Equal(t, ctx.Scope, accessToken.Scope)
 }
 
-func getContextSigner() authorization.ContextSigner {
+func getContextSigner() context.Signer {
 	test.ConfigureTestScenario()
 
-	var contextSigner authorization.ContextSigner
+	var contextSigner context.Signer
 	container.Make(&contextSigner)
 	return contextSigner
 }

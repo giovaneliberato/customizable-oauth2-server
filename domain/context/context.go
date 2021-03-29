@@ -1,4 +1,4 @@
-package authorization
+package context
 
 import (
 	"time"
@@ -16,7 +16,7 @@ type Context struct {
 	AuthorizationCode string
 }
 
-type ContextSigner interface {
+type Signer interface {
 	SignAndEncode(Context Context) (string, error)
 	VerifyAndDecode(context string) (Context, error)
 }
@@ -28,7 +28,7 @@ type contextSigner struct {
 	timeProvider      func() time.Time
 }
 
-func NewContextSignerWith(key string, issuer string, exp time.Duration) ContextSigner {
+func NewContextSignerWith(key string, issuer string, exp time.Duration) Signer {
 	return &contextSigner{
 		signingKey:        key,
 		contextIssuer:     issuer,
@@ -36,7 +36,7 @@ func NewContextSignerWith(key string, issuer string, exp time.Duration) ContextS
 	}
 }
 
-func NewContextSigner() ContextSigner {
+func NewContextSigner() Signer {
 	exp := time.Second * time.Duration(viper.GetInt("jwt.expiration-seconds"))
 	return &contextSigner{
 		signingKey:        viper.GetString("jwt.signing-key"),

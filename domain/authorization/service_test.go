@@ -3,6 +3,7 @@ package authorization_test
 import (
 	"oauth2-server/domain/authorization"
 	"oauth2-server/domain/client"
+	"oauth2-server/domain/context"
 	"oauth2-server/test"
 	"testing"
 
@@ -15,7 +16,7 @@ func TestNotBuildAuthorizationContextIfValidationFails(t *testing.T) {
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = client.Client{}
 
-	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
+	service := authorization.NewService(clientServiceMock, context.NewContextSigner())
 
 	ctx, err := service.Authorize(authorization.Authorization{})
 
@@ -28,7 +29,7 @@ func TestBuildAuthorizationContext(t *testing.T) {
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
 
-	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
+	service := authorization.NewService(clientServiceMock, context.NewContextSigner())
 
 	auth := authorization.Authorization{
 		ClientID:     test.TestClient.ID,
@@ -52,7 +53,7 @@ func TestRejectApproveAuthorizationIfSignatureIsInvalid(t *testing.T) {
 	test.LoadConfig()
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
-	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
+	service := authorization.NewService(clientServiceMock, context.NewContextSigner())
 
 	ctx, _ := service.Authorize(buildAuthorization())
 
@@ -72,7 +73,7 @@ func TestDeniedAuthorization(t *testing.T) {
 	test.LoadConfig()
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
-	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
+	service := authorization.NewService(clientServiceMock, context.NewContextSigner())
 
 	auth := buildAuthorization()
 	ctx, _ := service.Authorize(auth)
@@ -96,8 +97,8 @@ func TestSuccessfulAuthorization(t *testing.T) {
 	test.LoadConfig()
 	clientServiceMock := new(test.ClientServiceMock)
 	clientServiceMock.Return = test.TestClient
-	service := authorization.NewService(clientServiceMock, authorization.NewContextSigner())
-	authorizationSigner := authorization.NewContextSigner()
+	service := authorization.NewService(clientServiceMock, context.NewContextSigner())
+	authorizationSigner := context.NewContextSigner()
 
 	auth := buildAuthorization()
 	ctx, _ := service.Authorize(auth)

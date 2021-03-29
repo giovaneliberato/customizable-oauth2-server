@@ -4,6 +4,7 @@ import (
 	"oauth2-server/app/routes"
 	"oauth2-server/domain/authorization"
 	"oauth2-server/domain/client"
+	"oauth2-server/domain/context"
 	"oauth2-server/domain/token"
 	"oauth2-server/infra"
 
@@ -11,7 +12,7 @@ import (
 )
 
 var componentProviders = []interface{}{
-	authorization.NewContextSigner,
+	context.NewContextSigner,
 	client.NewRepository,
 	client.NewService,
 	authorization.NewService,

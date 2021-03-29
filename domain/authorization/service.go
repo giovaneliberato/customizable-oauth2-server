@@ -3,6 +3,7 @@ package authorization
 import (
 	"oauth2-server/domain"
 	"oauth2-server/domain/client"
+	"oauth2-server/domain/context"
 
 	"github.com/spf13/viper"
 )
@@ -15,11 +16,11 @@ type Service interface {
 
 type service struct {
 	client           client.Service
-	contextSigner    ContextSigner
+	contextSigner    context.Signer
 	authorizationURL string
 }
 
-func NewService(client client.Service, signer ContextSigner) Service {
+func NewService(client client.Service, signer context.Signer) Service {
 	return &service{
 		client:           client,
 		contextSigner:    signer,
@@ -76,7 +77,7 @@ func (s *service) ExchangeAuthorizationCode(r AuthorizationCodeExchange) (Author
 }
 
 func (s *service) buildAuthorizationContext(auth Authorization) string {
-	context := Context{
+	context := context.Context{
 		ClientID:    auth.ClientID,
 		State:       auth.State,
 		Scope:       auth.Scope,
@@ -87,8 +88,8 @@ func (s *service) buildAuthorizationContext(auth Authorization) string {
 	return signedContext
 }
 
-func (s *service) buildAuthorizationCodeContext(ctx Context, approval AuthorizationApproval) string {
-	context := Context{
+func (s *service) buildAuthorizationCodeContext(ctx context.Context, approval AuthorizationApproval) string {
+	context := context.Context{
 		ClientID:          ctx.ClientID,
 		Scope:             ctx.Scope,
 		RedirectURI:       ctx.RedirectURI,

@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"oauth2-server/app/routes"
 	"oauth2-server/domain"
-	"oauth2-server/domain/authorization"
+	"oauth2-server/domain/context"
 	"oauth2-server/test"
 	"strings"
 	"testing"
@@ -219,8 +219,8 @@ func httpClient() *http.Client {
 }
 
 func generateValidSignedContext() string {
-	signer := authorization.NewContextSigner()
-	Context := authorization.Context{
+	signer := context.NewContextSigner()
+	Context := context.Context{
 		ClientID:    test.TestClient.ID,
 		State:       "state",
 		Scope:       []string{"profile"},

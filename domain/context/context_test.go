@@ -1,7 +1,7 @@
-package authorization_test
+package context_test
 
 import (
-	"oauth2-server/domain/authorization"
+	"oauth2-server/domain/context"
 	"testing"
 	"time"
 
@@ -13,9 +13,9 @@ const TEST_KEY = "86088fd3028e486cc7adea8a1450a41e36529a23"
 const DURATION = time.Second * 60
 
 func TestSignAndEncode(t *testing.T) {
-	contextSigner := authorization.NewContextSignerWith(TEST_KEY, "app", DURATION)
+	contextSigner := context.NewContextSignerWith(TEST_KEY, "app", DURATION)
 
-	Context := authorization.Context{
+	Context := context.Context{
 		ClientID:    "test-client",
 		State:       "xpto",
 		Scope:       []string{"profile", "messages"},
@@ -34,14 +34,14 @@ func TestSignAndEncode(t *testing.T) {
 }
 
 func TestRejectInvalidContext(t *testing.T) {
-	contextSigner := authorization.NewContextSignerWith(TEST_KEY, "app", 1)
+	contextSigner := context.NewContextSignerWith(TEST_KEY, "app", 1)
 
 	_, err := contextSigner.VerifyAndDecode("not even a context")
 	assert.NotNil(t, err)
 }
 
 func TestRejectInvalidSignature(t *testing.T) {
-	contextSigner := authorization.NewContextSignerWith(TEST_KEY, "app", 1)
+	contextSigner := context.NewContextSignerWith(TEST_KEY, "app", 1)
 	context := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRfaWQiOiJ0ZXN0LWNsaWVudCIsImV4cCI6MTYxNjUzMTkzOSwiaWF0IjoxNjE2NTMxODc5LCJpc3MiOiJhcHAiLCJyZWRpcmVjdF91cmkiOiJodHRwczovL215LmFwcC9vYXV0aDItY2FsbGJhY2siLCJzY29wZXMiOiJwcm9maWxlIG1lc3NhZ2VzIiwic3RhdGUiOiJ4cHRvIn0.4i4ex4Hj63bot0DHg7AZwAaACJhPImessed"
 
 	_, err := contextSigner.VerifyAndDecode(context)
@@ -49,9 +49,9 @@ func TestRejectInvalidSignature(t *testing.T) {
 }
 
 func TestRejectExpiredTokens(t *testing.T) {
-	contextSigner := authorization.NewContextSignerWith(TEST_KEY, "app", 1)
+	contextSigner := context.NewContextSignerWith(TEST_KEY, "app", 1)
 
-	context, err := contextSigner.SignAndEncode(authorization.Context{})
+	context, err := contextSigner.SignAndEncode(context.Context{})
 	assert.Nil(t, err)
 	time.Sleep(1)
 
@@ -60,9 +60,9 @@ func TestRejectExpiredTokens(t *testing.T) {
 }
 
 func TestVerifySuccess(t *testing.T) {
-	contextSigner := authorization.NewContextSignerWith(TEST_KEY, "app", DURATION)
+	contextSigner := context.NewContextSignerWith(TEST_KEY, "app", DURATION)
 
-	Context := authorization.Context{
+	Context := context.Context{
 		ClientID:    "test-client",
 		State:       "xpto",
 		Scope:       []string{"profile", "messages"},
