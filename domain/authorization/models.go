@@ -4,7 +4,7 @@ import "oauth2-server/domain/token"
 
 type Authorization struct {
 	ClientID     string
-	ResponseType string
+	ResponseType []string
 	RedirectURI  string
 	Scope        []string
 	State        string

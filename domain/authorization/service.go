@@ -81,10 +81,11 @@ func (s *service) ExchangeAuthorizationCode(r AuthorizationCodeExchange) (Author
 
 func (s *service) buildAuthorizationContext(auth Authorization) string {
 	context := context.Context{
-		ClientID:    auth.ClientID,
-		State:       auth.State,
-		Scope:       auth.Scope,
-		RedirectURI: auth.RedirectURI,
+		ClientID:     auth.ClientID,
+		State:        auth.State,
+		Scope:        auth.Scope,
+		ResponseType: auth.ResponseType,
+		RedirectURI:  auth.RedirectURI,
 	}
 
 	signedContext, _ := s.contextSigner.SignAndEncode(context)
@@ -96,6 +97,7 @@ func (s *service) buildAuthorizationCodeContext(ctx context.Context, approval Au
 		ClientID:          ctx.ClientID,
 		Scope:             ctx.Scope,
 		RedirectURI:       ctx.RedirectURI,
+		ResponseType:      ctx.ResponseType,
 		AuthorizationCode: approval.AuthorizationCode,
 	}
 

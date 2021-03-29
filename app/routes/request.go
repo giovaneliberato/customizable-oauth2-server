@@ -25,7 +25,7 @@ func parseAuthorizationRequest(qs url.Values) (authorization.Authorization, *dom
 
 	return authorization.Authorization{
 		ClientID:     qs.Get("client_id"),
-		ResponseType: qs.Get("response_type"),
+		ResponseType: strings.Split(qs.Get("response_type"), " "),
 		RedirectURI:  qs.Get("redirect_uri"),
 		Scope:        strings.Split(qs.Get("scope"), " "),
 		State:        qs.Get("state"),

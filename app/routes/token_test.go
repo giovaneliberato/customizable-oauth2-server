@@ -39,7 +39,7 @@ func TestAccessTokenExchangeFailure(t *testing.T) {
 
 	ctx := context.Context{
 		ClientID:          test.TestClient.ID,
-		ResponseType:      "code",
+		ResponseType:      []string{"code"},
 		Scope:             test.TestClient.AllowedScopes,
 		RedirectURI:       test.TestClient.AllowedRedirectUrls[0],
 		AuthorizationCode: "some-authorization-code",
@@ -67,7 +67,7 @@ func TestAccessTokenExchangeSuccess(t *testing.T) {
 
 	ctx := context.Context{
 		ClientID:          test.TestClient.ID,
-		ResponseType:      "code",
+		ResponseType:      []string{"code"},
 		Scope:             test.TestClient.AllowedScopes,
 		RedirectURI:       test.TestClient.AllowedRedirectUrls[0],
 		AuthorizationCode: "some-authorization-code",

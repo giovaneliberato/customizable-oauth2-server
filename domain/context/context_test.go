@@ -63,10 +63,11 @@ func TestVerifySuccess(t *testing.T) {
 	contextSigner := context.NewContextSignerWith(TEST_KEY, "app", DURATION)
 
 	Context := context.Context{
-		ClientID:    "test-client",
-		State:       "xpto",
-		Scope:       []string{"profile", "messages"},
-		RedirectURI: "https://my.app/oauth2-callback",
+		ClientID:     "test-client",
+		State:        "xpto",
+		Scope:        []string{"profile", "messages"},
+		ResponseType: []string{"code"},
+		RedirectURI:  "https://my.app/oauth2-callback",
 	}
 
 	context, err := contextSigner.SignAndEncode(Context)

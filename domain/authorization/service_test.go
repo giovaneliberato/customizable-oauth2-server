@@ -29,7 +29,7 @@ func TestBuildAuthorizationContext(t *testing.T) {
 	auth := authorization.Authorization{
 		ClientID:     test.TestClient.ID,
 		RedirectURI:  test.TestClient.AllowedRedirectUrls[0],
-		ResponseType: "code",
+		ResponseType: []string{"code"},
 		State:        "client-state",
 		Scope:        []string{"profile"},
 	}
@@ -103,11 +103,11 @@ func TestSuccessfulAuthorization(t *testing.T) {
 	assert.Equal(t, auth.RedirectURI, resp.RedirectURI)
 	assert.Equal(t, auth.State, resp.State)
 
-	Context, _ := authorizationSigner.VerifyAndDecode(resp.SignedAuthorizationCode)
-	assert.Equal(t, approval.AuthorizationCode, Context.AuthorizationCode)
-	assert.Equal(t, auth.RedirectURI, Context.RedirectURI)
-	assert.Equal(t, test.TestClient.ID, Context.ClientID)
-	assert.Equal(t, auth.Scope, Context.Scope)
+	context, _ := authorizationSigner.VerifyAndDecode(resp.SignedAuthorizationCode)
+	assert.Equal(t, approval.AuthorizationCode, context.AuthorizationCode)
+	assert.Equal(t, auth.RedirectURI, context.RedirectURI)
+	assert.Equal(t, test.TestClient.ID, context.ClientID)
+	assert.Equal(t, auth.Scope, context.Scope)
 }
 
 func buildTestService() authorization.Service {
@@ -124,7 +124,7 @@ func buildAuthorization() authorization.Authorization {
 	return authorization.Authorization{
 		ClientID:     test.TestClient.ID,
 		RedirectURI:  test.TestClient.AllowedRedirectUrls[0],
-		ResponseType: test.TestClient.AllowedResponseTypes[0],
+		ResponseType: test.TestClient.AllowedResponseTypes,
 		State:        "client-state",
 		Scope:        []string{"profile"},
 	}

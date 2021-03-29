@@ -10,7 +10,7 @@ import (
 type Context struct {
 	ClientID          string
 	State             string
-	ResponseType      string
+	ResponseType      []string
 	Scope             []string
 	RedirectURI       string
 	AuthorizationCode string
@@ -45,34 +45,34 @@ func NewContextSigner() Signer {
 	}
 }
 
-func (t *contextSigner) SignAndEncode(Context Context) (string, error) {
+func (t *contextSigner) SignAndEncode(context Context) (string, error) {
 	now := jwt.TimeFunc()
 
 	mapContext := jwt.MapClaims{
 		"iss":           t.contextIssuer,
 		"iat":           now.Unix(),
 		"exp":           now.Add(t.expirationSeconds).Unix(),
-		"client_id":     Context.ClientID,
-		"redirect_uri":  Context.RedirectURI,
-		"scope":         Context.Scope,
-		"response_type": Context.ResponseType,
+		"client_id":     context.ClientID,
+		"redirect_uri":  context.RedirectURI,
+		"scope":         context.Scope,
+		"response_type": context.ResponseType,
 	}
 
-	if Context.State != "" {
-		mapContext["state"] = Context.State
+	if context.State != "" {
+		mapContext["state"] = context.State
 	}
 
-	if Context.AuthorizationCode != "" {
-		mapContext["authorization_code"] = Context.AuthorizationCode
+	if context.AuthorizationCode != "" {
+		mapContext["authorization_code"] = context.AuthorizationCode
 	}
 
-	context := jwt.NewWithClaims(jwt.SigningMethodHS256, mapContext)
-	return context.SignedString([]byte(t.signingKey))
+	contextClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, mapContext)
+	return contextClaims.SignedString([]byte(t.signingKey))
 }
 
-func (t *contextSigner) VerifyAndDecode(context string) (Context, error) {
+func (t *contextSigner) VerifyAndDecode(signedContext string) (Context, error) {
 	var parsedContext jwt.MapClaims
-	_, err := jwt.ParseWithClaims(context, &parsedContext, func(context *jwt.Token) (interface{}, error) {
+	_, err := jwt.ParseWithClaims(signedContext, &parsedContext, func(context *jwt.Token) (interface{}, error) {
 		return []byte(t.signingKey), nil
 	})
 
@@ -80,16 +80,16 @@ func (t *contextSigner) VerifyAndDecode(context string) (Context, error) {
 		return Context{}, err
 	}
 
-	Context := Context{
+	context := Context{
 		ClientID:          parsedContext["client_id"].(string),
 		Scope:             toStringSlice(parsedContext["scope"]),
 		State:             valueOrEmpty(parsedContext, "state"),
 		AuthorizationCode: valueOrEmpty(parsedContext, "authorization_code"),
 		RedirectURI:       parsedContext["redirect_uri"].(string),
-		ResponseType:      parsedContext["response_type"].(string),
+		ResponseType:      toStringSlice(parsedContext["response_type"]),
 	}
 
-	return Context, nil
+	return context, nil
 }
 
 func valueOrEmpty(Context jwt.MapClaims, key string) string {

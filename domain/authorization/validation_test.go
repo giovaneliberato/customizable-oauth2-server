@@ -56,7 +56,7 @@ func TestUnsupportedResponseType(t *testing.T) {
 	auth := authorization.Authorization{
 		ClientID:     client.ID,
 		RedirectURI:  client.AllowedRedirectUrls[0],
-		ResponseType: "implicit",
+		ResponseType: []string{"implicit"},
 	}
 
 	err := authorization.Validate(client, auth)
@@ -72,7 +72,7 @@ func TestUnsupportedScopeNoneMatch(t *testing.T) {
 	auth := authorization.Authorization{
 		ClientID:     client.ID,
 		RedirectURI:  client.AllowedRedirectUrls[0],
-		ResponseType: "code",
+		ResponseType: []string{"code"},
 		Scope:        []string{"admin-password"},
 	}
 
@@ -89,7 +89,7 @@ func TestUnsupportedScopeOneMatch(t *testing.T) {
 	auth := authorization.Authorization{
 		ClientID:     "test-id",
 		RedirectURI:  "https://test.client/oauth2-callback",
-		ResponseType: "code",
+		ResponseType: []string{"code"},
 		Scope:        []string{"profile", "admin-password"},
 	}
 
@@ -106,7 +106,7 @@ func TestSupportedScopeOneMatch(t *testing.T) {
 	auth := authorization.Authorization{
 		ClientID:     client.ID,
 		RedirectURI:  client.AllowedRedirectUrls[0],
-		ResponseType: "code",
+		ResponseType: []string{"code"},
 		Scope:        []string{"profile"},
 	}
 
@@ -119,7 +119,7 @@ func TestSupportedScopeTwoMatch(t *testing.T) {
 	auth := authorization.Authorization{
 		ClientID:     client.ID,
 		RedirectURI:  client.AllowedRedirectUrls[0],
-		ResponseType: "code",
+		ResponseType: []string{"code"},
 		Scope:        []string{"profile", "messages"},
 	}
 
@@ -132,7 +132,7 @@ func TestSupportedScopeAllMatch(t *testing.T) {
 	auth := authorization.Authorization{
 		ClientID:     client.ID,
 		RedirectURI:  client.AllowedRedirectUrls[0],
-		ResponseType: "code",
+		ResponseType: []string{"code"},
 		Scope:        []string{"profile", "contacts", "messages"},
 	}
 
