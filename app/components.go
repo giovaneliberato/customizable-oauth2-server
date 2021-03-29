@@ -6,7 +6,6 @@ import (
 	"oauth2-server/domain/client"
 	"oauth2-server/domain/context"
 	"oauth2-server/domain/token"
-	"oauth2-server/infra"
 
 	"github.com/golobby/container/v2"
 )
@@ -16,7 +15,7 @@ var componentProviders = []interface{}{
 	client.NewRepository,
 	client.NewService,
 	authorization.NewService,
-	infra.NewExternalServiceClient,
+	token.NewExternalServiceClient,
 	token.NewService,
 	routes.NewTokenRoutes,
 	routes.NewAuthorizationRoutes,

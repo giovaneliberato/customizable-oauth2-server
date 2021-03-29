@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"oauth2-server/app/routes"
 	"oauth2-server/domain"
-	"oauth2-server/domain/authorization"
 	"oauth2-server/domain/context"
+	"oauth2-server/domain/token"
 	"oauth2-server/test"
 	"testing"
 
@@ -83,7 +83,7 @@ func TestAccessTokenExchangeSuccess(t *testing.T) {
 
 	resp, _ := httpClient().PostForm(server.URL+"/oauth2/token", form)
 
-	var respBody authorization.AccessTokenResponse
+	var respBody token.AccessTokenResponse
 	json.NewDecoder(resp.Body).Decode(&respBody)
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
@@ -121,7 +121,7 @@ func TestRefreshAccessTokenExchangeSuccess(t *testing.T) {
 
 	resp, _ := httpClient().PostForm(server.URL+"/oauth2/token", form)
 
-	var respBody authorization.AccessTokenResponse
+	var respBody token.AccessTokenResponse
 	json.NewDecoder(resp.Body).Decode(&respBody)
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
