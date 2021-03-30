@@ -29,6 +29,6 @@ var TestClient = client.Client{
 	RawSecret:            "secret",
 	HashedSecret:         client.HashSecret("secret"),
 	AllowedRedirectUrls:  []string{"https://test.client/oauth2-callback"},
-	AllowedResponseTypes: []string{"code"},
+	AllowedResponseTypes: []string{"code", "token"},
 	AllowedScopes:        []string{"profile", "contacts", "messages"},
 }

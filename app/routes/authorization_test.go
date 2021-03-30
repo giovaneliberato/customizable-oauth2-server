@@ -175,6 +175,68 @@ func TestApproveAuthorizationInvalidRequest(t *testing.T) {
 	assert.Equal(t, "invalid_request", respBody.Err)
 }
 
+func TestSuccessfulAuthorizationRedirectsResponseTypeToken(t *testing.T) {
+	var server = test.TestServerFor(routes.AuthorizationRouter)
+
+	signer := context.NewContextSigner()
+	Context := context.Context{
+		ClientID:     test.TestClient.ID,
+		State:        "state",
+		ResponseType: []string{"token"},
+		Scope:        []string{"profile"},
+		RedirectURI:  test.TestClient.AllowedRedirectUrls[0],
+	}
+	signedContext, _ := signer.SignAndEncode(Context)
+
+	form := url.Values{}
+	form.Add("approved", "true")
+	form.Add("authorization_code", "3CJu2J5Yix8tQw")
+	form.Add("signed_context", signedContext)
+	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
+
+	redirectURL := resp.Header.Get("Location")
+	url, _ := url.Parse(redirectURL)
+	qs := url.Query()
+
+	assert.Equal(t, test.TestClient.AllowedRedirectUrls[0], strings.Split(url.String(), "?")[0])
+	assert.Equal(t, http.StatusFound, resp.StatusCode)
+	assert.Equal(t, "state", qs.Get("state"))
+	assert.Empty(t, qs.Get("code"))
+	assert.NotEmpty(t, qs.Get("access_token"))
+	assert.NotEmpty(t, qs.Get("refresh_token"))
+}
+
+func TestSuccessfulAuthorizationRedirectsResponseTypeHybrid(t *testing.T) {
+	var server = test.TestServerFor(routes.AuthorizationRouter)
+
+	signer := context.NewContextSigner()
+	Context := context.Context{
+		ClientID:     test.TestClient.ID,
+		State:        "state",
+		ResponseType: []string{"token", "code"},
+		Scope:        []string{"profile"},
+		RedirectURI:  test.TestClient.AllowedRedirectUrls[0],
+	}
+	signedContext, _ := signer.SignAndEncode(Context)
+
+	form := url.Values{}
+	form.Add("approved", "true")
+	form.Add("authorization_code", "3CJu2J5Yix8tQw")
+	form.Add("signed_context", signedContext)
+	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
+
+	redirectURL := resp.Header.Get("Location")
+	url, _ := url.Parse(redirectURL)
+	qs := url.Query()
+
+	assert.Equal(t, test.TestClient.AllowedRedirectUrls[0], strings.Split(url.String(), "?")[0])
+	assert.Equal(t, http.StatusFound, resp.StatusCode)
+	assert.Equal(t, "state", qs.Get("state"))
+	assert.NotEmpty(t, qs.Get("code"))
+	assert.NotEmpty(t, qs.Get("access_token"))
+	assert.NotEmpty(t, qs.Get("refresh_token"))
+}
+
 func TestSuccessfulAuthorizationRedirectsClient(t *testing.T) {
 	var server = test.TestServerFor(routes.AuthorizationRouter)
 	form := url.Values{}
@@ -221,10 +283,11 @@ func httpClient() *http.Client {
 func generateValidSignedContext() string {
 	signer := context.NewContextSigner()
 	Context := context.Context{
-		ClientID:    test.TestClient.ID,
-		State:       "state",
-		Scope:       []string{"profile"},
-		RedirectURI: test.TestClient.AllowedRedirectUrls[0],
+		ClientID:     test.TestClient.ID,
+		State:        "state",
+		ResponseType: []string{"code"},
+		Scope:        []string{"profile"},
+		RedirectURI:  test.TestClient.AllowedRedirectUrls[0],
 	}
 	signedContext, _ := signer.SignAndEncode(Context)
 	return signedContext

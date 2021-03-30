@@ -34,11 +34,15 @@ func oneItemNotIn(query []string, set []string) bool {
 	return false
 }
 
-func notIn(query string, set []string) bool {
+func In(query string, set []string) bool {
 	for _, item := range set {
 		if item == query {
-			return false
+			return true
 		}
 	}
-	return true
+	return false
+}
+
+func notIn(query string, set []string) bool {
+	return !In(query, set)
 }

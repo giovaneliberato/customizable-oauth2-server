@@ -68,11 +68,22 @@ func (s *service) ApproveAuthorization(approval AuthorizationApproval) (Authoriz
 
 	signedAuthorizationCode := s.buildAuthorizationCodeContext(context, approval)
 
-	return AuthorizationReponse{
+	response := AuthorizationReponse{
 		SignedAuthorizationCode: signedAuthorizationCode,
 		State:                   context.State,
+		ResponseType:            context.ResponseType,
 		RedirectURI:             context.RedirectURI,
-	}, nil
+	}
+
+	if In("token", context.ResponseType) {
+		response.AccessToken, err = s.tokenService.ExchangeWithoutValidation(signedAuthorizationCode)
+	}
+
+	if !In("code", context.ResponseType) {
+		response.SignedAuthorizationCode = ""
+	}
+
+	return response, nil
 }
 
 func (s *service) ExchangeAuthorizationCode(r AuthorizationCodeExchange) (AuthorizationReponse, *domain.OAuthError) {

@@ -27,6 +27,7 @@ type AuthozirationContext struct {
 type AuthorizationReponse struct {
 	RedirectURI             string
 	State                   string
+	ResponseType            []string
 	AccessToken             token.AccessTokenResponse
 	SignedAuthorizationCode string
 }

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"oauth2-server/domain/authorization"
@@ -81,7 +82,17 @@ func buildApprovalRedirectURI(ctx authorization.AuthozirationContext) string {
 func buildClientCallbackRedirectURI(resp authorization.AuthorizationReponse) string {
 	qs := url.Values{}
 	qs.Add("state", resp.State)
-	qs.Add("code", resp.SignedAuthorizationCode)
+
+	if authorization.In("code", resp.ResponseType) {
+		qs.Add("code", resp.SignedAuthorizationCode)
+	}
+
+	if authorization.In("token", resp.ResponseType) {
+		qs.Add("access_token", resp.AccessToken.AccessToken)
+		qs.Add("refresh_token", resp.AccessToken.RefreshToken)
+		qs.Add("token_type", resp.AccessToken.TokenType)
+		qs.Add("expires_in", fmt.Sprint(resp.AccessToken.ExpiresIn))
+	}
 
 	return resp.RedirectURI + "?" + qs.Encode()
 }

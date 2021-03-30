@@ -44,6 +44,66 @@ func TestBuildAuthorizationContext(t *testing.T) {
 	assert.NotEmpty(t, ctx.SignedAuthorizationContext)
 }
 
+func TestAuthorizationWithTokenResponseType(t *testing.T) {
+	test.LoadConfig()
+
+	service := buildTestService()
+
+	auth := authorization.Authorization{
+		ClientID:     test.TestClient.ID,
+		RedirectURI:  test.TestClient.AllowedRedirectUrls[0],
+		ResponseType: []string{"token"},
+		State:        "client-state",
+		Scope:        []string{"profile"},
+	}
+	ctx, err := service.Authorize(auth)
+
+	approval := authorization.AuthorizationApproval{
+		ApprovedByUser:             true,
+		AuthorizationCode:          "authorization-code",
+		SignedAuthorizationRequest: ctx.SignedAuthorizationContext,
+	}
+
+	resp, err := service.ApproveAuthorization(approval)
+
+	assert.Nil(t, err)
+	assert.Equal(t, auth.ClientID, ctx.ClientID)
+	assert.Equal(t, auth.Scope, auth.Scope)
+	assert.Equal(t, auth.RedirectURI, resp.RedirectURI)
+	assert.Empty(t, resp.SignedAuthorizationCode)
+	assert.NotEmpty(t, resp.AccessToken.AccessToken)
+}
+
+func TestAuthorizationWithHybridResponseType(t *testing.T) {
+	test.LoadConfig()
+
+	service := buildTestService()
+
+	auth := authorization.Authorization{
+		ClientID:     test.TestClient.ID,
+		RedirectURI:  test.TestClient.AllowedRedirectUrls[0],
+		ResponseType: []string{"token", "code"},
+		State:        "client-state",
+		Scope:        []string{"profile"},
+	}
+	ctx, err := service.Authorize(auth)
+
+	approval := authorization.AuthorizationApproval{
+		ApprovedByUser:             true,
+		AuthorizationCode:          "authorization-code",
+		SignedAuthorizationRequest: ctx.SignedAuthorizationContext,
+	}
+
+	resp, err := service.ApproveAuthorization(approval)
+
+	assert.Nil(t, err)
+	assert.Equal(t, auth.ClientID, ctx.ClientID)
+	assert.Equal(t, auth.Scope, auth.Scope)
+	assert.Equal(t, auth.RedirectURI, resp.RedirectURI)
+	assert.NotEmpty(t, resp.SignedAuthorizationCode)
+	assert.NotEmpty(t, resp.AccessToken.AccessToken)
+}
+
 func TestRejectApproveAuthorizationIfSignatureIsInvalid(t *testing.T) {
 	test.LoadConfig()
 	service := buildTestService()
