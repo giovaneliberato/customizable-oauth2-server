@@ -78,6 +78,7 @@ func TestAccessTokenExchangeSuccess(t *testing.T) {
 	form := url.Values{}
 	form.Add("client_id", test.TestClient.ID)
 	form.Add("client_secret", test.TestClient.RawSecret)
+	form.Add("redirect_uri", ctx.RedirectURI)
 	form.Add("code", signedAuthCode)
 	form.Add("grant_type", "authorization_code")
 

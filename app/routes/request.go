@@ -76,6 +76,7 @@ func parseAuthorizationCodeRequest(r *http.Request) (token.AuthorizationCodeRequ
 		r.FormValue("client_id"),
 		r.FormValue("client_secret"),
 		r.FormValue("grant_type"),
+		r.FormValue("redirect_uri"),
 		r.FormValue("code"),
 	}
 
@@ -88,6 +89,7 @@ func parseAuthorizationCodeRequest(r *http.Request) (token.AuthorizationCodeRequ
 		ClientSecret:            r.FormValue("client_secret"),
 		GrantType:               r.FormValue("grant_type"),
 		SignedAuthorizationCode: r.FormValue("code"),
+		RedirectURL:             r.FormValue("redirect_uri"),
 	}, nil
 }
 
