@@ -70,7 +70,7 @@ func (a *authorizationRoutes) ProcessAuthorization(w http.ResponseWriter, r *htt
 	http.Redirect(w, r, redirectURI, http.StatusFound)
 }
 
-func buildApprovalRedirectURI(ctx authorization.AuthozirationContext) string {
+func buildApprovalRedirectURI(ctx authorization.AuthorizationContext) string {
 	qs := url.Values{}
 	qs.Add("client_id", ctx.ClientID)
 	qs.Add("client_name", ctx.ClientName)

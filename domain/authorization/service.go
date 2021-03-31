@@ -10,7 +10,7 @@ import (
 )
 
 type Service interface {
-	Authorize(Authorization) (AuthozirationContext, *domain.OAuthError)
+	Authorize(Authorization) (AuthorizationContext, *domain.OAuthError)
 	ApproveAuthorization(AuthorizationApproval) (AuthorizationReponse, *domain.OAuthError)
 	ExchangeAuthorizationCode(AuthorizationCodeExchange) (AuthorizationReponse, *domain.OAuthError)
 }
@@ -31,7 +31,7 @@ func NewService(clientService client.Service, signer context.Signer, tokenServic
 	}
 }
 
-func (s *service) Authorize(auth Authorization) (AuthozirationContext, *domain.OAuthError) {
+func (s *service) Authorize(auth Authorization) (AuthorizationContext, *domain.OAuthError) {
 	client := s.clientService.GetByID(auth.ClientID)
 
 	err := Validate(client, auth)
@@ -39,7 +39,7 @@ func (s *service) Authorize(auth Authorization) (AuthozirationContext, *domain.O
 		return AuthozirationContext{}, err
 	}
 
-	ctx := AuthozirationContext{
+	ctx := AuthorizationContext{
 		AuthorizationURL:           s.authorizationURL,
 		ClientID:                   client.ID,
 		ClientName:                 client.Name,

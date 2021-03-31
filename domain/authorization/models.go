@@ -16,7 +16,7 @@ type AuthorizationApproval struct {
 	SignedAuthorizationRequest string
 }
 
-type AuthozirationContext struct {
+type AuthorizationContext struct {
 	AuthorizationURL           string
 	ClientID                   string
 	ClientName                 string
