@@ -9,7 +9,7 @@ import (
 )
 
 func LoadConfig() {
-	viper.AddConfigPath(rootDir())
+	viper.AddConfigPath(rootDir() + "/app")
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 
