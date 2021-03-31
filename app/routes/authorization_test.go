@@ -130,12 +130,16 @@ func TestAuthoriationRedirectsToApprovalWithMultipleScopes(t *testing.T) {
 
 func TestUnsuccessfulAuthorization(t *testing.T) {
 	var server = test.TestServerFor(routes.AuthorizationRouter)
-	form := url.Values{}
-	form.Add("approved", "true")
-	form.Add("authorization_code", "3CJu2J5Yix8tQw")
-	form.Add("signed_context", generateValidSignedContext()+"tampered")
+	qs := url.Values{}
+	qs.Add("approved", "true")
+	qs.Add("authorization_code", "3CJu2J5Yix8tQw")
+	qs.Add("signed_context", generateValidSignedContext()+"tampered")
 
-	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
+	req, _ := http.NewRequest("GET", server.URL+"/oauth2/approve-authorization", nil)
+	req.URL.RawQuery = qs.Encode()
+
+	resp, _ := httpClient().Do(req)
+
 	var respBody domain.OAuthError
 	json.NewDecoder(resp.Body).Decode(&respBody)
 
@@ -146,15 +150,18 @@ func TestUnsuccessfulAuthorization(t *testing.T) {
 
 func TestUnnaprovedAuthorization(t *testing.T) {
 	var server = test.TestServerFor(routes.AuthorizationRouter)
-	form := url.Values{}
-	form.Add("approved", "false")
-	form.Add("authorization_code", "3CJu2J5Yix8tQw")
-	form.Add("signed_context", generateValidSignedContext())
-	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
+	qs := url.Values{}
+	qs.Add("approved", "false")
+	qs.Add("authorization_code", "3CJu2J5Yix8tQw")
+	qs.Add("signed_context", generateValidSignedContext())
+
+	req, _ := http.NewRequest("GET", server.URL+"/oauth2/approve-authorization", nil)
+	req.URL.RawQuery = qs.Encode()
+	resp, _ := httpClient().Do(req)
 
 	redirectURL := resp.Header.Get("Location")
 	url, _ := url.Parse(redirectURL)
-	qs := url.Query()
+	qs = url.Query()
 
 	assert.Equal(t, test.TestClient.AllowedRedirectUrls[0], strings.Split(url.String(), "?")[0])
 	assert.Equal(t, http.StatusFound, resp.StatusCode)
@@ -164,8 +171,11 @@ func TestUnnaprovedAuthorization(t *testing.T) {
 
 func TestApproveAuthorizationInvalidRequest(t *testing.T) {
 	var server = test.TestServerFor(routes.AuthorizationRouter)
-	form := url.Values{}
-	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
+	qs := url.Values{}
+
+	req, _ := http.NewRequest("GET", server.URL+"/oauth2/approve-authorization", nil)
+	req.URL.RawQuery = qs.Encode()
+	resp, _ := httpClient().Do(req)
 
 	var respBody domain.OAuthError
 	json.NewDecoder(resp.Body).Decode(&respBody)
@@ -179,24 +189,27 @@ func TestSuccessfulAuthorizationRedirectsResponseTypeToken(t *testing.T) {
 	var server = test.TestServerFor(routes.AuthorizationRouter)
 
 	signer := context.NewContextSigner()
-	Context := context.Context{
+	context := context.Context{
 		ClientID:     test.TestClient.ID,
 		State:        "state",
 		ResponseType: []string{"token"},
 		Scope:        []string{"profile"},
 		RedirectURI:  test.TestClient.AllowedRedirectUrls[0],
 	}
-	signedContext, _ := signer.SignAndEncode(Context)
+	signedContext, _ := signer.SignAndEncode(context)
 
-	form := url.Values{}
-	form.Add("approved", "true")
-	form.Add("authorization_code", "3CJu2J5Yix8tQw")
-	form.Add("signed_context", signedContext)
-	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
+	qs := url.Values{}
+	qs.Add("approved", "true")
+	qs.Add("authorization_code", "3CJu2J5Yix8tQw")
+	qs.Add("signed_context", signedContext)
+
+	req, _ := http.NewRequest("GET", server.URL+"/oauth2/approve-authorization", nil)
+	req.URL.RawQuery = qs.Encode()
+	resp, _ := httpClient().Do(req)
 
 	redirectURL := resp.Header.Get("Location")
 	url, _ := url.Parse(redirectURL)
-	qs := url.Query()
+	qs = url.Query()
 
 	assert.Equal(t, test.TestClient.AllowedRedirectUrls[0], strings.Split(url.String(), "?")[0])
 	assert.Equal(t, http.StatusFound, resp.StatusCode)
@@ -210,24 +223,27 @@ func TestSuccessfulAuthorizationRedirectsResponseTypeHybrid(t *testing.T) {
 	var server = test.TestServerFor(routes.AuthorizationRouter)
 
 	signer := context.NewContextSigner()
-	Context := context.Context{
+	context := context.Context{
 		ClientID:     test.TestClient.ID,
 		State:        "state",
 		ResponseType: []string{"token", "code"},
 		Scope:        []string{"profile"},
 		RedirectURI:  test.TestClient.AllowedRedirectUrls[0],
 	}
-	signedContext, _ := signer.SignAndEncode(Context)
+	signedContext, _ := signer.SignAndEncode(context)
 
-	form := url.Values{}
-	form.Add("approved", "true")
-	form.Add("authorization_code", "3CJu2J5Yix8tQw")
-	form.Add("signed_context", signedContext)
-	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
+	qs := url.Values{}
+	qs.Add("approved", "true")
+	qs.Add("authorization_code", "3CJu2J5Yix8tQw")
+	qs.Add("signed_context", signedContext)
+
+	req, _ := http.NewRequest("GET", server.URL+"/oauth2/approve-authorization", nil)
+	req.URL.RawQuery = qs.Encode()
+	resp, _ := httpClient().Do(req)
 
 	redirectURL := resp.Header.Get("Location")
 	url, _ := url.Parse(redirectURL)
-	qs := url.Query()
+	qs = url.Query()
 
 	assert.Equal(t, test.TestClient.AllowedRedirectUrls[0], strings.Split(url.String(), "?")[0])
 	assert.Equal(t, http.StatusFound, resp.StatusCode)
@@ -239,15 +255,18 @@ func TestSuccessfulAuthorizationRedirectsResponseTypeHybrid(t *testing.T) {
 
 func TestSuccessfulAuthorizationRedirectsClient(t *testing.T) {
 	var server = test.TestServerFor(routes.AuthorizationRouter)
-	form := url.Values{}
-	form.Add("approved", "true")
-	form.Add("authorization_code", "3CJu2J5Yix8tQw")
-	form.Add("signed_context", generateValidSignedContext())
-	resp, _ := httpClient().PostForm(server.URL+"/oauth2/approve-authorization", form)
+	qs := url.Values{}
+	qs.Add("approved", "true")
+	qs.Add("authorization_code", "3CJu2J5Yix8tQw")
+	qs.Add("signed_context", generateValidSignedContext())
+
+	req, _ := http.NewRequest("GET", server.URL+"/oauth2/approve-authorization", nil)
+	req.URL.RawQuery = qs.Encode()
+	resp, _ := httpClient().Do(req)
 
 	redirectURL := resp.Header.Get("Location")
 	url, _ := url.Parse(redirectURL)
-	qs := url.Query()
+	qs = url.Query()
 
 	assert.Equal(t, test.TestClient.AllowedRedirectUrls[0], strings.Split(url.String(), "?")[0])
 	assert.Equal(t, http.StatusFound, resp.StatusCode)

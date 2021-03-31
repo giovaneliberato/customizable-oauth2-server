@@ -32,22 +32,22 @@ func parseAuthorizationRequest(qs url.Values) (authorization.Authorization, *dom
 	}, nil
 }
 
-func parseAuthorizationApproval(r *http.Request) (authorization.AuthorizationApproval, *domain.OAuthError) {
+func parseAuthorizationApproval(qs url.Values) (authorization.AuthorizationApproval, *domain.OAuthError) {
 	required := []string{
-		r.FormValue("approved"),
-		r.FormValue("authorization_code"),
-		r.FormValue("signed_context"),
+		qs.Get("approved"),
+		qs.Get("authorization_code"),
+		qs.Get("signed_context"),
 	}
 
-	approved, err := strconv.ParseBool(r.FormValue("approved"))
+	approved, err := strconv.ParseBool(qs.Get("approved"))
 	if anyValueMissing(required) || err != nil {
 		return authorization.AuthorizationApproval{}, domain.InvalidAuthorizationCodeRequestError
 	}
 
 	return authorization.AuthorizationApproval{
 		ApprovedByUser:             approved,
-		AuthorizationCode:          r.FormValue("authorization_code"),
-		SignedAuthorizationRequest: r.FormValue("signed_context"),
+		AuthorizationCode:          qs.Get("authorization_code"),
+		SignedAuthorizationRequest: qs.Get("signed_context"),
 	}, nil
 }
 

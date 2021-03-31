@@ -17,7 +17,7 @@ func AuthorizationRouter(r *chi.Mux) {
 	container.Make(&route)
 
 	r.Get("/oauth2/authorize", route.Authorize)
-	r.Post("/oauth2/approve-authorization", route.ProcessAuthorization)
+	r.Get("/oauth2/approve-authorization", route.ProcessAuthorization)
 }
 
 type AuthorizationRoutes interface {
@@ -53,7 +53,7 @@ func (a *authorizationRoutes) Authorize(w http.ResponseWriter, r *http.Request) 
 }
 
 func (a *authorizationRoutes) ProcessAuthorization(w http.ResponseWriter, r *http.Request) {
-	approvalRequest, err := parseAuthorizationApproval(r)
+	approvalRequest, err := parseAuthorizationApproval(r.URL.Query())
 	if err != nil {
 		renderErrorWithStatus(w, r, err, http.StatusBadRequest)
 		return
