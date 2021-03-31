@@ -73,6 +73,7 @@ func (a *authorizationRoutes) ProcessAuthorization(w http.ResponseWriter, r *htt
 func buildApprovalRedirectURI(ctx authorization.AuthozirationContext) string {
 	qs := url.Values{}
 	qs.Add("client_id", ctx.ClientID)
+	qs.Add("client_name", ctx.ClientName)
 	qs.Add("requested_scopes", strings.Join(ctx.RequestedScopes, " "))
 	qs.Add("signed_context", ctx.SignedAuthorizationContext)
 

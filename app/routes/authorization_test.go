@@ -106,6 +106,7 @@ func TestAuthoriationRedirectsToApproval(t *testing.T) {
 	assert.Equal(t, http.StatusFound, resp.StatusCode)
 	assert.Equal(t, "/oauth2/authorize", url.Path)
 	assert.Equal(t, "test-id", qs.Get("client_id"))
+	assert.Equal(t, test.TestClient.Name, qs.Get("client_name"))
 	assert.Equal(t, "profile", qs.Get("requested_scopes"))
 	assert.NotEmpty(t, qs.Get("signed_context"))
 }
