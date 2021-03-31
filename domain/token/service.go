@@ -30,24 +30,29 @@ func (s *service) Exchange(req AuthorizationCodeRequest) (AccessTokenResponse, *
 	ctx, err := s.contextSigner.VerifyAndDecode(req.SignedAuthorizationCode)
 
 	if err != nil {
+		monitorExchangeError(req, err)
 		return AccessTokenResponse{}, domain.InvalidAuthorizationCodeRequestError
 	}
 
 	if err := ValidateContext(req, ctx); err != nil {
+		monitorExchangeError(req, err)
 		return AccessTokenResponse{}, err
 	}
 
 	client := s.clientService.GetByID(req.ClientID)
 
 	if err := ValidateClient(req.ClientID, req.ClientSecret, client); err != nil {
+		monitorExchangeError(req, err)
 		return AccessTokenResponse{}, err
 	}
 
 	accessToken, externalErr := s.externalServiceClient.GetAccessToken(ctx)
 	if externalErr != nil {
+		monitorExchangeError(req, err)
 		return AccessTokenResponse{}, externalErr
 	}
 
+	monitorExchangeSuccess(req)
 	return accessToken, nil
 }
 

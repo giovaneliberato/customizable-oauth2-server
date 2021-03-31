@@ -36,7 +36,8 @@ func (s *service) Authorize(auth Authorization) (AuthorizationContext, *domain.O
 
 	err := Validate(client, auth)
 	if err != nil {
-		return AuthozirationContext{}, err
+		monitorAuthorizationError(auth, err)
+		return AuthorizationContext{}, err
 	}
 
 	ctx := AuthorizationContext{
@@ -47,6 +48,7 @@ func (s *service) Authorize(auth Authorization) (AuthorizationContext, *domain.O
 		SignedAuthorizationContext: s.buildAuthorizationContext(auth),
 	}
 
+	monitorAuthorizationSuccess(auth)
 	return ctx, nil
 }
 
@@ -54,6 +56,7 @@ func (s *service) ApproveAuthorization(approval AuthorizationApproval) (Authoriz
 	context, err := s.contextSigner.VerifyAndDecode(approval.SignedAuthorizationRequest)
 
 	if err != nil {
+		monitorApprovalError(approval, err)
 		return AuthorizationReponse{}, domain.InvalidApproveAuthorizationError
 	}
 
@@ -63,6 +66,7 @@ func (s *service) ApproveAuthorization(approval AuthorizationApproval) (Authoriz
 			State:       context.State,
 		}
 
+		monitorApprovalDenied(context)
 		return resp, domain.AccessDeniedError
 	}
 
