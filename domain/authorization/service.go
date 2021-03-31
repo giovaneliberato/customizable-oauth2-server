@@ -12,7 +12,6 @@ import (
 type Service interface {
 	Authorize(Authorization) (AuthorizationContext, *domain.OAuthError)
 	ApproveAuthorization(AuthorizationApproval) (AuthorizationReponse, *domain.OAuthError)
-	ExchangeAuthorizationCode(AuthorizationCodeExchange) (AuthorizationReponse, *domain.OAuthError)
 }
 
 type service struct {
@@ -87,11 +86,8 @@ func (s *service) ApproveAuthorization(approval AuthorizationApproval) (Authoriz
 		response.SignedAuthorizationCode = ""
 	}
 
+	monitorApprovalSuccess(context)
 	return response, nil
-}
-
-func (s *service) ExchangeAuthorizationCode(r AuthorizationCodeExchange) (AuthorizationReponse, *domain.OAuthError) {
-	return AuthorizationReponse{}, nil
 }
 
 func (s *service) buildAuthorizationContext(auth Authorization) string {
