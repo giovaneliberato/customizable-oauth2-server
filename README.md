@@ -21,7 +21,7 @@ With this scenario in mind, this projects "wraps" your existing login systems wi
 **Note:** This is not a library. There might be breaking changes in the future as the protocol evolves. Consider this project a scaffold for your own implementation.
 
 __________________________
-[![Build Status](https://travis-ci.com/giovaneliberato/customizable-oauth2-server.svg?branch=main)](https://travis-ci.com/giovaneliberato/customizable-oauth2-server) [![Known Vulnerabilities](https://snyk.io/test/github/{username}/{repo}/badge.svg)](https://snyk.io/test/github/giovaneliberato/customizable-oauth2-server)
+[![Build Status](https://travis-ci.com/giovaneliberato/customizable-oauth2-server.svg?branch=main)](https://travis-ci.com/giovaneliberato/customizable-oauth2-server) [![Known Vulnerabilities](https://snyk.io/test/github/giovaneliberato/customizable-oauth2-server/badge.svg)](https://snyk.io/test/github/giovaneliberato/customizable-oauth2-server)
   [![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](http://golang.org) [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE) [![Go Report Card](https://goreportcard.com/badge/github.com/giovaneliberato/your-oauth2-server-here)](https://goreportcard.com/report/github.com/giovaneliberato/your-oauth2-server-here)
 
 
