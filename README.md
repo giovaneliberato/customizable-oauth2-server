@@ -17,6 +17,7 @@ With this scenario in mind, this projects "wraps" your existing login systems wi
 
 
 [Getting Started](_docs/getting_started.md) • [Customizing](_docs/customizing.md) 
+
 **Note:** This is not a library. There might be breaking changes in the future as the protocol evolves. Consider this project a scaffold for your own implementation.
 
 __________________________
