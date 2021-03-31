@@ -2,6 +2,7 @@ package token_test
 
 import (
 	"oauth2-server/domain"
+	"oauth2-server/domain/context"
 	"oauth2-server/domain/token"
 	"oauth2-server/test"
 	"testing"
@@ -21,9 +22,26 @@ func TestClientIDDoNotMatch(t *testing.T) {
 	assert.Equal(t, domain.InvalidClientError, err)
 }
 
+func TestRequestURLDoNotMatch(t *testing.T) {
+	ctx := context.Context{
+		ClientID:    test.TestClient.ID,
+		RedirectURI: test.TestClient.AllowedRedirectUrls[0],
+	}
+
+	req := token.AuthorizationCodeRequest{
+		ClientID:    test.TestClient.ID,
+		RedirectURL: "http://invalid.url",
+	}
+
+	err := token.ValidateContext(req, ctx)
+	assert.NotNil(t, err)
+	assert.Equal(t, domain.InvalidAuthorizationCodeRequestError, err)
+}
+
 func TestClientSecretDoNotMatch(t *testing.T) {
 	req := token.AuthorizationCodeRequest{
-		ClientID:     test.TestClient.ID,
+		ClientID: test.TestClient.ID,
+
 		ClientSecret: "not-the-same-secret",
 		GrantType:    "authorization_code",
 	}

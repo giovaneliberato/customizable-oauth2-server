@@ -12,6 +12,10 @@ func ValidateContext(req AuthorizationCodeRequest, ctx context.Context) *domain.
 		return domain.InvalidClientError
 	}
 
+	if req.RedirectURL != ctx.RedirectURI {
+		return domain.InvalidAuthorizationCodeRequestError
+	}
+
 	return nil
 }
 

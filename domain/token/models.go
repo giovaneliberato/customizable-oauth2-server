@@ -4,6 +4,7 @@ type AuthorizationCodeRequest struct {
 	ClientID                string
 	ClientSecret            string
 	GrantType               string
+	RedirectURL             string
 	SignedAuthorizationCode string
 }
 
