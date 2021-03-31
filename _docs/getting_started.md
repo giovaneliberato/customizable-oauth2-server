@@ -19,9 +19,11 @@ The access and refresh token (aka session tokens) used to access your applicatio
 
 
 ## Requests breakdown
+![](img/oauth2-breakdown.png)
 
 
 ## Disclaimer
+This has not been peer reviewed. Make sure you are confortable with the security and architectural decisions before using it. I do not hold any responsibility for deployed versions.
 
 
 
