@@ -112,6 +112,7 @@ func TestExchangeSuccess(t *testing.T) {
 	req := token.AuthorizationCodeRequest{
 		ClientID:                test.TestClient.ID,
 		ClientSecret:            test.TestClient.RawSecret,
+		RedirectURL:             ctx.RedirectURI,
 		GrantType:               "authorization_code",
 		SignedAuthorizationCode: signedAuthCode,
 	}
